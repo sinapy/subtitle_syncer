@@ -35,7 +35,7 @@ if (analysisDuration <= TimeSpan.Zero)
     return 2;
 }
 
-var analysis = new VoiceActivityDetector(new FfmpegAudioPreparation(), new TenVadEngine())
+var analysis = new VoiceActivityDetector(new FfmpegAudioPreparation(), new SileroVadEngine())
     .Analyze(moviePath, analysisDuration);
 var export = new ActivityExport(analysis.Audio.Duration.TotalSeconds,
     analysis.Activities.Select(activity => new ActivityExportItem(activity.Start.TotalSeconds, activity.End.TotalSeconds)).ToArray());

@@ -38,11 +38,10 @@ open.
   convert a model artifact.
 - [ ] The release has been smoke-tested from a clean Windows 10 and Windows 11
   machine with no GPU; CUDA is only an optional optimization.
-- [ ] The x64 TEN VAD DLL and all required LLVM runtime dependencies load from
-  the installed application directory, without a global native-library setup.
-- [ ] Third-party inventory, source/version, licenses, and notices are shipped
-  with the product. Legal review has specifically approved the TEN VAD license
-  and its additional deployment conditions for the intended distribution.
+- [ ] The sherpa-onnx runtime and bundled Silero ONNX model load on each
+  supported target architecture without a system-wide CUDA installation.
+- [ ] Third-party inventory, source/version, licenses, notices, and the Silero
+  VAD model license are shipped with the product and approved for distribution.
 - [ ] Dependency vulnerability and malware scans have been run, reviewed, and
   recorded for .NET, Python packages, native binaries, FFmpeg, and the model
   distribution channel.
@@ -104,6 +103,6 @@ open.
 
 - [Problem statement](problem-statement.md)
 - [Approach](approach.md)
-- [TEN VAD integration](ten-vad.md)
+- [Silero VAD integration](silero-vad.md)
 - [Duration-only alignment](duration-alignment.md)
 - [Running tests](testing.md)

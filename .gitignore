@@ -102,6 +102,8 @@ __pypackages__/
 
 # Locally provisioned on-device models
 models/
+!src/SubtitleSyncer.Vad/models/
+!src/SubtitleSyncer.Vad/models/silero_vad.onnx
 
 # Media files
 *.avi

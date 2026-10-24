@@ -33,5 +33,5 @@ for repeated dialogue, credits, music, and timing drift. Details are in
 ## Related
 
 - [Layered pipeline architecture](pipeline-architecture.md)
-- [TEN VAD integration](ten-vad.md)
+- [Silero VAD integration](silero-vad.md)
 - [Software principles](software-principles.md)

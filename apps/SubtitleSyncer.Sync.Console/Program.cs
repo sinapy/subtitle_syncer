@@ -27,7 +27,7 @@ try
     manifest.Validate(options.ModelPath);
 
     var analysisDuration = TimeSpan.FromSeconds(options.AnalysisSeconds);
-    var analysis = new VoiceActivityDetector(new FfmpegAudioPreparation(), new TenVadEngine())
+    var analysis = new VoiceActivityDetector(new FfmpegAudioPreparation(), new SileroVadEngine())
         .Analyze(options.VideoPath, analysisDuration);
     var duration = analysis.Audio.Duration.TotalSeconds;
     var speech = analysis.Activities.Select(activity => new Interval(activity.Start.TotalSeconds, activity.End.TotalSeconds)).ToArray();

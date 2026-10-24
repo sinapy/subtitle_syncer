@@ -16,7 +16,7 @@ exporting the model to ONNX.
 ```text
 movie
   ↓
-.NET VAD library (FFmpeg + TEN VAD)
+.NET VAD library (FFmpeg + sherpa-onnx Silero VAD)
   ↓ chronological activity intervals
 .NET sync console + SRT intervals + local ONNX Runtime model
   ↓
@@ -30,11 +30,11 @@ result without modifying the source subtitle file. `--device auto` attempts
 CUDA and falls back to CPU; `--device cpu` never initializes CUDA.
 
 `SubtitleSyncer.Audio` holds the PCM timeline contract, `SubtitleSyncer.Vad`
-owns FFmpeg preparation and TEN VAD, and the sync console owns SRT parsing and
+owns FFmpeg preparation and Silero VAD, and the sync console owns SRT parsing and
 ONNX inference. The C# runtime has no dependency on Python.
 
 ## Related
 
 - [Approach](approach.md)
 - [Duration-only alignment](duration-alignment.md)
-- [TEN VAD integration](ten-vad.md)
+- [Silero VAD integration](silero-vad.md)

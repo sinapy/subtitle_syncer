@@ -35,13 +35,18 @@ the feature order, logit input/output names, calibration bias, and fixed
 coarse-to-fine candidate search settings. A .NET host uses ONNX Runtime to
 evaluate batches of candidates and applies sigmoid to the returned logits.
 
+Changing VAD engines changes the timing-feature distribution. A model trained
+from TEN VAD activity JSON must not be shipped with Silero VAD activities:
+regenerate the reference activity exports, retrain, re-export ONNX, and pass
+the held-out gates before release.
+
 ## Westworld bootstrap corpus
 
 `tests/data/westworld-duration-training.json` declares ten reproducible
 one-minute synthetic samples from the known-aligned Westworld S01E01 fixture.
 It records each bounded timeline region and the manual subtitle shift applied
 to it; it does not duplicate the subtitle file or movie. The VAD console can
-export the local TEN VAD activity timeline as JSON for Python training:
+export the local Silero VAD activity timeline as JSON for Python training:
 
 ```bash
 mkdir -p artifacts/duration_alignment
@@ -96,6 +101,58 @@ dotnet run --project apps/SubtitleSyncer.Sync.Console -- \
 
 `--device auto` attempts CUDA then reliably falls back to CPU. `--device cpu`
 forces CPU; `--device cuda` fails clearly if CUDA is unavailable.
+
+## Linux bootstrap, retraining, and held-out check
+
+From the repository root, install the Python training dependencies, export the
+known-aligned S01E01 Silero activities, retrain, and write a fresh deployment
+artifact:
+
+```bash
+python3 -m pip install -r python/duration_alignment/requirements.txt
+mkdir -p artifacts/duration_alignment
+dotnet run --project apps/SubtitleSyncer.Vad.Console -- \
+  "tests/data/Westworld(2016)-S01E01-The_Original-[WEBDL-1080p][AC3 5.1][h264].mkv" 3600 \
+  --export-activities artifacts/duration_alignment/westworld_60m_activities.json
+python3 python/duration_alignment/train.py \
+  --subtitles tests/data/Westworld.S01E01.720p.WEBRip.srt \
+  --activities artifacts/duration_alignment/westworld_60m_activities.json \
+  --chunk-seconds 120 --output artifacts/duration_alignment/model_60m_120s
+python3 python/duration_alignment/export_onnx.py \
+  --model artifacts/duration_alignment/model_60m_120s/duration_offset_model.pt
+```
+
+`train.py` already exports ONNX by default; the final command repeats the
+conversion as an explicit deployment-artifact check. Inspect `metrics.json` and
+do not promote the model if the trainer exits nonzero.
+
+For the independent S01E05 regression, first generate its activity export:
+
+```bash
+dotnet run --project apps/SubtitleSyncer.Vad.Console -- \
+  "tests/data/Westworld(2016)-S01E05-Contrapasso_ [Bluray-1080p][AC3 5.1][x265]-YAWNiX.mkv" 1800 \
+  --export-activities artifacts/duration_alignment/westworld_s01e05_silero_1800s.json
+```
+
+On Linux, `SubtitleSyncer.Sync.Console` loads sherpa-onnx for VAD and ONNX
+Runtime for duration scoring in the same process. Put sherpa-onnx's matching
+native directory first on `LD_LIBRARY_PATH`; otherwise the console can load an
+incompatible `libonnxruntime.so` and fail while creating the VAD detector.
+The following command performs the held-out native check using the package
+version referenced by `SubtitleSyncer.Vad.csproj`:
+
+```bash
+SHERPA_NATIVE_DIR="$HOME/.nuget/packages/org.k2fsa.sherpa.onnx.runtime.linux-x64/2.0.0/runtimes/linux-x64/native"
+LD_LIBRARY_PATH="$SHERPA_NATIVE_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+dotnet run --project apps/SubtitleSyncer.Sync.Console -- \
+  --video "tests/data/Westworld(2016)-S01E05-Contrapasso_ [Bluray-1080p][AC3 5.1][x265]-YAWNiX.mkv" \
+  --subtitles tests/data/Westworld.S01E05.720p.HDTV.x264-KILLERS.srt \
+  --model artifacts/duration_alignment/model_60m_120s/duration_offset_model.onnx \
+  --analysis-seconds 1800 --device cpu
+```
+
+Keep S01E05 out of the training inputs. Its result is a regression check, not
+an additional fitting signal.
 
 ## Test any movie/subtitle pair
 
@@ -168,10 +225,16 @@ fails.
 
 The S01E05 movie/subtitle pair was not used in the Westworld S01E01 bootstrap
 training. A manual review identified a good correction in the −2.9 to −2.6
-second range. Running the duration-alignment workflow on its first 1,800 seconds produced −2.6514
-seconds with 84.1% model confidence (543 VAD activities and 420 cues), inside
-that manually established range. Keep S01E05 out of future training data if it
-is to remain an independent regression check.
+second range. With the historical TEN VAD activity timeline, the first 1,800
+seconds produced −2.6514 seconds with 84.1% model confidence (543 activities
+and 420 cues), inside that range.
+
+As a migration check, the same pre-Silero model scored a new 1,800-second
+Silero activity export at −2.5514 seconds with 76.4% confidence (297
+activities and 420 cues). That is outside the reviewed range, so the old
+model is not valid for Silero deployment. Regenerate the training activity
+exports and retrain before treating S01E05 as a Silero regression check.
+Keep S01E05 out of future training data if it is to remain independent.
 
 ## Limits
 
@@ -184,5 +247,5 @@ separate manifests, with held-out movies used to measure false acceptance.
 ## Related
 
 - [Approach](approach.md)
-- [TEN VAD integration](ten-vad.md)
+- [Silero VAD integration](silero-vad.md)
 - [Running tests](testing.md)

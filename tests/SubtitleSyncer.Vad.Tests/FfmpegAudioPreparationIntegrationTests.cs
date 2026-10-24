@@ -21,7 +21,7 @@ public sealed class FfmpegAudioPreparationIntegrationTests
         Assert.True(audio.Duration > TimeSpan.Zero);
         Assert.True(audio.Duration <= VadOptions.DefaultAnalysisDuration);
 
-        var activities = new TenVadEngine().Detect(audio, TestContext.Current.CancellationToken);
+        var activities = new SileroVadEngine().Detect(audio, TestContext.Current.CancellationToken);
         Assert.All(activities, activity =>
         {
             Assert.True(activity.Start >= audio.Start);

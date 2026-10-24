@@ -11,7 +11,7 @@ timestamp: 2026-10-24T00:00:00Z
 **Decision:** Python trains the synchronization model and emits a portable
 ONNX inference artifact. The deployed synchronization host is the .NET
 `SubtitleSyncer.Sync.Console` using ONNX Runtime; the VAD library prepares
-movie audio with FFmpeg and obtains local TEN VAD activity intervals.
+movie audio with FFmpeg and obtains local Silero VAD activity intervals.
 
 ## Supported stack
 
@@ -20,7 +20,7 @@ movie audio with FFmpeg and obtains local TEN VAD activity intervals.
 | Subtitle timing parsing and offset search | .NET `SubtitleSyncer.Sync.Console`; Python retains equivalent trainer scripts |
 | Model training | PyTorch, using CUDA when available and CPU otherwise |
 | Deployed model inference | ONNX Runtime in .NET; CPU by default, CUDA execution provider optional |
-| Media extraction and VAD | .NET `SubtitleSyncer.Vad` with FFmpeg and TEN VAD; the VAD console exports training activity JSON |
+| Media extraction and VAD | .NET `SubtitleSyncer.Vad` with FFmpeg and sherpa-onnx Silero VAD; the VAD console exports training activity JSON |
 | Training/deployment boundary | ONNX model plus JSON inference manifest |
 
 The ONNX model consumes only numerical timing features. No deployed component
@@ -30,4 +30,4 @@ needs subtitle text, transcription, translation, network access, or CUDA.
 
 - [Approach](approach.md)
 - [Layered pipeline architecture](pipeline-architecture.md)
-- [TEN VAD integration](ten-vad.md)
+- [Silero VAD integration](silero-vad.md)

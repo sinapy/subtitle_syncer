@@ -22,5 +22,5 @@ remove it:
 The scripts must stay inside this repository or installed product layout so
 they can locate `apps/SubtitleSyncer.Sync.Console` and
 `artifacts/duration_alignment/model_60m_120s/duration_offset_model.onnx`.
-The ONNX model, .NET runtime, TEN VAD native files, and FFmpeg still need to
+The ONNX models, .NET runtime, sherpa-onnx native runtime, and FFmpeg still need to
 be provisioned. Python is not needed at inference time.

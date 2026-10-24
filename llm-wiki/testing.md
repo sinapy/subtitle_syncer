@@ -33,5 +33,5 @@ check on the held-out local movie fixture.
 ## Related
 
 - [Duration-only alignment](duration-alignment.md)
-- [TEN VAD integration](ten-vad.md)
+- [Silero VAD integration](silero-vad.md)
 - [Layered pipeline architecture](pipeline-architecture.md)

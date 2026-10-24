@@ -17,7 +17,7 @@ the project’s durable shared context.
 - [Approach](approach.md) — the native .NET duration-only synchronization workflow.
 - [Implementation language](implementation-language.md) — Python training with native .NET/ONNX inference.
 - [Layered pipeline architecture](pipeline-architecture.md) — boundaries and data flow of the supported path.
-- [TEN VAD integration](ten-vad.md) — selected local VAD runtime, packaging, and license considerations.
+- [Silero VAD integration](silero-vad.md) — selected cross-platform local VAD runtime, packaging, and license considerations.
 - [Duration-only alignment](duration-alignment.md) — local constant-offset estimation from subtitle and VAD timing.
 - [Software principles](software-principles.md) — rules for safe transformations and reliable offset estimates.
 - [Running tests](testing.md) — supported checks and required local fixtures.

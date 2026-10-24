@@ -17,9 +17,9 @@ timestamp: 2026-10-24T00:00:00Z
   timing without rewriting the supplied subtitle file; applying an accepted
   correction is a separate explicit operation.
 
-- Keep transformations small and observable. The VAD bridge exports activity
-  intervals, while Python owns candidate scoring and acceptance; neither layer
-  should silently change the other layer's timeline.
+- Keep transformations small and observable. The VAD layer produces activity
+  intervals, while the native ONNX alignment layer owns candidate scoring and
+  acceptance; neither layer should silently change the other layer's timeline.
 
 - Put usefulness decisions at the layer with the evidence. The duration model
   evaluates subtitle and speech-timing support together, and returns a
