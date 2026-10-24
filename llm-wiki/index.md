@@ -21,6 +21,10 @@ the project’s durable shared context.
 - [Duration-only alignment](duration-alignment.md) — local constant-offset estimation from subtitle and VAD timing.
 - [Software principles](software-principles.md) — rules for safe transformations and reliable offset estimates.
 - [Running tests](testing.md) — supported checks and required local fixtures.
+- [Production readiness checklist](production-checklist.md) — release gates for
+  the local Windows workflow.
+- [Explorer context-menu integration](explorer-context-menu.md) — per-user
+  Windows right-click entry for SRT files.
 
 ## How to maintain this wiki
 
