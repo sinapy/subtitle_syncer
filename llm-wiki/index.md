@@ -3,7 +3,7 @@ type: Knowledge Index
 title: Subtitle Syncer LLM Wiki
 description: Shared project knowledge for humans and AI agents working on Subtitle Syncer.
 tags: [subtitle-syncing, project-context, agents]
-timestamp: 2026-10-23T00:00:00Z
+timestamp: 2026-10-24T00:00:00Z
 ---
 
 # Subtitle Syncer LLM Wiki
@@ -14,25 +14,13 @@ the project’s durable shared context.
 ## Core context
 
 - [Problem statement](problem-statement.md) — the user problem this project is meant to solve.
-- [Approach](approach.md) — fast, constant-offset subtitle synchronization.
-- [Language library coverage](language-library-landscape.md) — library routes
-  and per-language availability score for every pipeline stage.
-- [Implementation language](implementation-language.md) — C#/.NET decision and
-  the Windows-first on-device baseline stack.
-- [Layered pipeline architecture](pipeline-architecture.md) — C# contracts,
-  branch boundaries, and delivery order for a usable project.
-- [TEN VAD integration](ten-vad.md) — selected local VAD runtime, packaging,
-  and license considerations.
-- [Local Persian-to-English translation](translation.md) — the independent,
-  CPU-only translation stack and model provisioning instructions.
-- [Subtitle-to-speech matching](matching.md) — the application composition
-  layer and its order-preserving fuzzy text matcher.
-- [Duration-only alignment](duration-alignment.md) — local constant-offset
-  estimation from subtitle and VAD timing, without language models.
-- [Software principles](software-principles.md) — rules for safe transformations,
-  preserving source data, and avoiding brittle heuristics.
-- [Running tests](testing.md) — required local integration fixtures and the
-  supported full test command.
+- [Approach](approach.md) — the Python-first duration-only synchronization workflow.
+- [Implementation language](implementation-language.md) — Python alignment with a minimal .NET VAD bridge.
+- [Layered pipeline architecture](pipeline-architecture.md) — boundaries and data flow of the supported path.
+- [TEN VAD integration](ten-vad.md) — selected local VAD runtime, packaging, and license considerations.
+- [Duration-only alignment](duration-alignment.md) — local constant-offset estimation from subtitle and VAD timing.
+- [Software principles](software-principles.md) — rules for safe transformations and reliable offset estimates.
+- [Running tests](testing.md) — supported checks and required local fixtures.
 
 ## How to maintain this wiki
 
