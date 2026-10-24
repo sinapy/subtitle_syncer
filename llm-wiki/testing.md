@@ -12,6 +12,7 @@ All tests run by default, including model and movie integration coverage.
 Before testing, provision these ignored local fixtures:
 
 - `tests/data/Shaun.Of.The.Dead.(2004).[REMASTERED].[REPACK].[1080p].[BluRay].[5.1].[YTS.MX]-xpost.mp4`
+- `tests/data/Westworld(2016)-S01E01-The_Original-[WEBDL-1080p][AC3 5.1][h264].mkv`
 - `models/ggml-small.en-q5_1.bin`
 - `models/qwen2.5-1.5b-instruct-q4_k_m.gguf`
 
@@ -34,6 +35,20 @@ default. Set `TRANSLATION_MODEL_PATH` to test another local GGUF model.
 The versioned `tests/data/Shaun_Of_The_Dead.srt` fixture is UTF-8 so its
 Persian text displays correctly in standard editors. The parser continues to
 support Windows-1256 input for externally supplied legacy subtitles.
+
+The duration-only bootstrap uses the Python trainer with the aligned Westworld
+subtitle fixture and VAD activity export. It has no translation or
+transcription model requirement:
+
+```bash
+dotnet run --project apps/SubtitleSyncer.Vad.Console -- \
+  "tests/data/Westworld(2016)-S01E01-The_Original-[WEBDL-1080p][AC3 5.1][h264].mkv" 3600 \
+  --export-activities artifacts/duration_alignment/westworld_60m_activities.json
+```
+
+The PyTorch model trainer and its held-out synthetic-offset quality gate are
+documented in [duration-only alignment](duration-alignment.md). Its generated
+activity JSON, model, and metrics belong under ignored `artifacts/`.
 
 ## Related
 

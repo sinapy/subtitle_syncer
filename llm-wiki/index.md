@@ -27,6 +27,8 @@ the project’s durable shared context.
   CPU-only translation stack and model provisioning instructions.
 - [Subtitle-to-speech matching](matching.md) — the application composition
   layer and its order-preserving fuzzy text matcher.
+- [Duration-only alignment](duration-alignment.md) — local constant-offset
+  estimation from subtitle and VAD timing, without language models.
 - [Software principles](software-principles.md) — rules for safe transformations,
   preserving source data, and avoiding brittle heuristics.
 - [Running tests](testing.md) — required local integration fixtures and the

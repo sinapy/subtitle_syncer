@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="apps/SubtitleSyncer.Matching.Console/SubtitleSyncer.Matching.Console.csproj" />
   <Project Path="apps/SubtitleSyncer.Review.Web/SubtitleSyncer.Review.Web.csproj" />
+  <Project Path="apps/SubtitleSyncer.Vad.Console/SubtitleSyncer.Vad.Console.csproj" />
   <Project Path="src/SubtitleSyncer.SubtitleParsing/SubtitleSyncer.SubtitleParsing.csproj" />
   <Project Path="src/SubtitleSyncer.SubtitleParsing.Client/SubtitleSyncer.SubtitleParsing.Client.csproj" />
   <Project Path="src/SubtitleSyncer.Translation/SubtitleSyncer.Translation.csproj" />

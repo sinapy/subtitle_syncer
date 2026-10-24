@@ -1,0 +1,14 @@
+{
+  "samples": [
+    { "id": "westworld-00-to-01", "appliedSubtitleOffsetSeconds": -97.5, "startSeconds": 0, "endSeconds": 60 },
+    { "id": "westworld-01-to-02", "appliedSubtitleOffsetSeconds": -61.25, "startSeconds": 60, "endSeconds": 120 },
+    { "id": "westworld-02-to-03", "appliedSubtitleOffsetSeconds": -28.75, "startSeconds": 120, "endSeconds": 180 },
+    { "id": "westworld-03-to-04", "appliedSubtitleOffsetSeconds": -12.5, "startSeconds": 180, "endSeconds": 240 },
+    { "id": "westworld-04-to-05", "appliedSubtitleOffsetSeconds": -3.25, "startSeconds": 240, "endSeconds": 300 },
+    { "id": "westworld-05-to-06", "appliedSubtitleOffsetSeconds": 4.5, "startSeconds": 300, "endSeconds": 360 },
+    { "id": "westworld-06-to-07", "appliedSubtitleOffsetSeconds": 17.75, "startSeconds": 360, "endSeconds": 420 },
+    { "id": "westworld-07-to-08", "appliedSubtitleOffsetSeconds": 39.5, "startSeconds": 420, "endSeconds": 480 },
+    { "id": "westworld-08-to-09", "appliedSubtitleOffsetSeconds": 73.25, "startSeconds": 480, "endSeconds": 540 },
+    { "id": "westworld-09-to-10", "appliedSubtitleOffsetSeconds": 108.5, "startSeconds": 540, "endSeconds": 600 }
+  ]
+}

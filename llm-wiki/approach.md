@@ -14,10 +14,16 @@ can be tested with local fixtures before the layer above it exists. The full
 contracts and build order are in [layered pipeline architecture](pipeline-architecture.md).
 
 ```text
-movie → VAD (including bounded audio preparation) → English transcription ─┐
-                                                           ├→ match → offsets → median → result
-subtitle file → parse → opted-in cue transforms → translate ┘
+movie → VAD (including bounded audio preparation) ─┐
+                                                  ├→ duration-only alignment → constant offset
+subtitle file → parse → subtitle intervals ──────┘
 ```
+
+The duration-only path is the automatic baseline. It compares only subtitle
+and voice-activity timing, and trains a compact local scorer from synthetic
+shifts of a known-correct pair. Translation/transcription-based fuzzy matching
+remains available as a separate diagnostic/manual path, not as a dependency of
+automatic synchronization.
 
 ## Audio pipeline
 

@@ -32,18 +32,16 @@ references only for models and contracts they consume.
 ## Dependency shape
 
 ```text
-VAD (including audio preparation) → English transcription ──┐
-                                                            │
-Subtitle parsing → opted-in cue transforms → translation ───┤
-                                                            ↓
-                                            chronological matcher
-                                                            ↓
-                                         offset estimator/result
+VAD (including audio preparation) ───────────┐
+                                             ↓
+Subtitle parsing ─────────────────→ duration alignment → offset/result
 ```
 
-The matcher is the only component that knows about both branches. Nothing in
-the parsing, cue-transformation, translation, VAD, or transcription layers may
-calculate an offset.
+The Python duration-alignment workflow is the automatic composition layer. It
+is the only component that knows about both timelines, and nothing in parsing
+or VAD may calculate an offset. Its only inputs are cue and voice-activity
+timing; it intentionally has no reference to translation or transcription. The
+older translation/transcription matcher remains an independent diagnostic path.
 
 ## Domain models
 
@@ -196,17 +194,14 @@ estimate is a normal result, not an exception.
 
 ## Orchestration
 
-`SynchronizationService` is the sole composition root for the pipeline:
+`python/duration_alignment/sync.py` is the automatic composition root:
 
-1. Ask VAD to prepare bounded audio and detect activities. For each activity,
-   slice the prepared audio with two seconds of bounded context, then pass that
-   audio to `EnglishTranscription`.
-2. Read the subtitle file, apply explicitly requested cue transforms, and
-   translate the resulting cues.
-3. Pass both chronological sequences to the matcher, then pass matches to the
-   estimator.
-4. Return `SynchronizationResult`; applying an accepted offset to a subtitle
-   file belongs to a separate explicit writer operation.
+1. Ask VAD to prepare bounded audio and detect activities.
+2. Read the subtitle file and retain its chronological cue intervals.
+3. Load the locally trained timing scorer and search the supplied cue/activity
+   timelines for a single constant offset.
+4. Print the correction and confidence; applying an accepted offset to a
+   subtitle file remains a separate explicit writer operation.
 
 This makes it possible to unit-test every layer without FFmpeg or a model, use
 recorded fixtures for integration tests, and test the orchestration with fake
@@ -226,13 +221,12 @@ fixtures and commands are documented in [running tests](testing.md).
    `analysisDuration` (five minutes by default). The VAD stack owns FFmpeg
    extraction of a mono 16 kHz prefix; model inference remains behind
    `IVadEngine` so the TEN VAD adapter can be changed or tested independently.
-4. Add `EnglishTranscription` in the transcription stack over VAD windows.
-5. Add local generic text translation and test Persian-to-English with fixed
-   fixtures.
-6. Implement the matcher and basic median offset calculation; add an
-   acceptance rule and diagnostics.
-7. Compose the layers in `SynchronizationService`, then add an explicit
+4. Implement Python duration-only offset alignment over subtitle and VAD
+   intervals, with synthetic-shift training, an acceptance rule, and diagnostics.
+5. Compose that path in an application entry point, then add an explicit
    subtitle-offset writer and end-to-end fixtures.
+6. Keep transcription and translation as optional diagnostic tooling rather
+   than dependencies of automatic synchronization.
 
 ## Related
 
