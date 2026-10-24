@@ -11,7 +11,7 @@ timestamp: 2026-10-24T00:00:00Z
 Build the retained .NET VAD bridge and run its tests from the repository root:
 
 ```bash
-dotnet build SubtitleSyncer.slnx
+dotnet build src/SubtitleSyncer.Vad/SubtitleSyncer.Vad.csproj
 dotnet run --project tests/SubtitleSyncer.Vad.Tests --no-restore
 ```
 

@@ -15,14 +15,13 @@ credits, translator credits, title cards, music, and other non-dialogue should
 be ignored so the project can quickly infer one reliable constant offset and
 apply it to the whole subtitle file.
 
-## Constraint: on-device models only
+## Constraint: on-device processing only
 
-All model inference, including Persian-to-English translation, speech
-transcription, and VAD when model-based, must run on the user's device. The
-product must not send movie audio, subtitle text, derived transcripts, or
-model prompts to a hosted inference or translation service. Model files may be
-provisioned separately, but synchronization itself must work without network
-access once they are installed.
+Synchronization must not send movie audio, subtitle timing, or derived
+activity data to a hosted service. The local VAD runtime and the duration
+alignment model run on the user's device; model files may be provisioned
+separately, but synchronization itself must work without network access once
+they are installed.
 
 ## Constraint: ordinary Windows computer
 

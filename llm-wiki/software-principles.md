@@ -13,24 +13,20 @@ timestamp: 2026-10-24T00:00:00Z
   is demonstrated for supported inputs. For example, do not remove a cue just
   because an all-caps line might be a title card.
 
-- Preserve source data and timelines. Any exclusion is an explicit caller
-  choice, and cues that remain are never rewritten. For example,
-  `ExcludeHtmlTag()` removes a matching cue rather than changing its text or
-  timing.
+- Preserve source data and timelines. The alignment workflow reads subtitle
+  timing without rewriting the supplied subtitle file; applying an accepted
+  correction is a separate explicit operation.
 
-- Make transformations small and composable. Method names must describe their
-  exact effect rather than promise broad sanitization. For example, a caller
-  can choose `ExcludeHtmlTag().ExcludeUrls().ExcludeEmpty()`.
+- Keep transformations small and observable. The VAD bridge exports activity
+  intervals, while Python owns candidate scoring and acceptance; neither layer
+  should silently change the other layer's timeline.
 
-- Put usefulness decisions at the layer with the evidence. The matcher has
-  both translated subtitle text and transcribed speech, so it decides whether
-  a cue is useful through confidence rather than early text guesses. For
-  example, a sound-label cue can remain available but simply receive no
-  reliable match.
+- Put usefulness decisions at the layer with the evidence. The duration model
+  evaluates subtitle and speech-timing support together, and returns a
+  low-confidence rejection instead of forcing an offset.
 
-- Test both effects and preservation. Tests cover a transform's intended
-  change as well as the multilingual input and timeline data it must retain.
-  For example, an HTML-tag test verifies that an untagged cue remains intact.
+- Test both effects and preservation. Tests cover the VAD timeline boundary,
+  and duration-model evaluation must measure held-out offset accuracy.
 
 ## Related
 
