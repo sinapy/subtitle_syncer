@@ -23,17 +23,14 @@ the SRT reader contract, `SubtitleCue`, and SRT-specific implementation. Its
 tests live in `SubtitleSyncer.SubtitleParsing.Tests` and use xUnit.net v3.
 Shared test fixtures live under `tests/data`; subtitle fixtures there are
 versioned even though production subtitle files are ignored.
-Future audio, VAD,
-transcription, cue-transformation, translation, matching, and orchestration stacks
+Future VAD, transcription, cue-transformation, translation, matching, and orchestration stacks
 should follow the same one-stack/one-project rule, using explicit project
 references only for models and contracts they consume.
 
 ## Dependency shape
 
 ```text
-Audio preparation
-        ↓
-Voice activity detection → English transcription ───────────┐
+VAD (including audio preparation) → English transcription ──┐
                                                             │
 Subtitle parsing → opted-in cue transforms → translation ───┤
                                                             ↓
@@ -82,34 +79,45 @@ information are never lost.
 
 ## Layer contracts
 
-### Audio and VAD branch
+### VAD and transcription stacks
 
-Audio extraction is a thin infrastructure adapter. It supplies the VAD layer
-with bounded, mono 16 kHz audio from the first `analysisDuration`; it is not
-part of matching logic.
+There are two neighboring stacks in the audio branch:
+
+- `SubtitleSyncer.Vad` owns both audio preparation and voice-activity
+  detection. Its implementation extracts bounded, mono 16 kHz PCM from the
+  movie before evaluating it with VAD. FFmpeg extraction is an implementation
+  detail of this stack, not a separate `AudioPreparation` stack or public
+  pipeline stage.
+- `SubtitleSyncer.Transcription` provides `EnglishTranscription`. Its contract
+  accepts audio and returns transcription; it has no project reference to VAD
+  and does not re-extract the movie or make VAD decisions.
+
+VAD returns its activity windows and the bounded PCM audio used to find them.
+The orchestrator uses those windows to select the corresponding audio regions
+and calls transcription for each region. `PcmAudio` is an audio contract, not
+a VAD type: it carries its sample rate, channel count, start offset, and PCM
+samples. The audio is bounded to `analysisDuration`; every activity and
+transcription timestamp nevertheless refers to the original movie timeline.
 
 ```csharp
-public interface IAudioExtractor
-{
-    PcmAudio Extract(string moviePath, TimeSpan analysisDuration);
-}
-
 public interface IVoiceActivityDetector
 {
-    IEnumerable<VoiceActivity> Detect(PcmAudio audio);
+    VoiceActivityAnalysis Analyze(string moviePath, TimeSpan analysisDuration);
 }
+
+public sealed record VoiceActivityAnalysis(
+    PcmAudio Audio, IReadOnlyList<VoiceActivity> Activities);
 
 public interface IEnglishTranscriber
 {
-    IEnumerable<SpeechSegment> Transcribe(PcmAudio audio,
-        IEnumerable<VoiceActivity> activities);
+    IEnumerable<SpeechSegment> Transcribe(PcmAudio audio);
 }
 ```
 
-`PcmAudio` is an internal model that records sample rate, channel count, start
-offset, and PCM samples. The baseline uses local FFmpeg for extraction,
-ONNX/Silero for VAD, and local Whisper.net for transcription. VAD output must
-be sorted, non-overlapping, and bounded by `analysisDuration`; the transcriber
+The baseline uses local FFmpeg and TEN VAD within VAD, and local Whisper.net
+in `EnglishTranscription`. TEN VAD is called through a small native C ABI
+adapter and consumes mono 16 kHz PCM in 160- or 256-sample frames. VAD output must be sorted,
+non-overlapping, and bounded by `analysisDuration`; `EnglishTranscription`
 must preserve the absolute timeline positions from each activity.
 
 ### Subtitle branch
@@ -176,7 +184,8 @@ estimate is a normal result, not an exception.
 
 `SynchronizationService` is the sole composition root for the pipeline:
 
-1. Extract bounded audio, detect activities, and transcribe them.
+1. Ask VAD to prepare bounded audio and detect activities. For each activity,
+   select its audio region and pass that audio to `EnglishTranscription`.
 2. Read the subtitle file, apply explicitly requested cue transforms, and
    translate the resulting cues.
 3. Pass both chronological sequences to the matcher, then pass matches to the
@@ -194,8 +203,11 @@ implementations.
    expose `IEnumerable<SubtitleCue>`.
 2. Implement and test explicitly requested, mechanical cue transforms while
    preserving source timing and order.
-3. Add the audio extractor and VAD with a configurable `analysisDuration`.
-4. Add local English transcription over VAD windows.
+3. Add the VAD stack, including movie-audio preparation, with a configurable
+   `analysisDuration` (five minutes by default). The VAD stack owns FFmpeg
+   extraction of a mono 16 kHz prefix; model inference remains behind
+   `IVadEngine` so the TEN VAD adapter can be changed or tested independently.
+4. Add `EnglishTranscription` in the transcription stack over VAD windows.
 5. Add local generic text translation and test Persian-to-English with fixed
    fixtures.
 6. Implement the matcher, offset estimator, acceptance rule, and diagnostics.

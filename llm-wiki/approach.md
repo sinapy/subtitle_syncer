@@ -14,19 +14,21 @@ can be tested with local fixtures before the layer above it exists. The full
 contracts and build order are in [layered pipeline architecture](pipeline-architecture.md).
 
 ```text
-movie → bounded audio → VAD → English transcription ────────┐
+movie → VAD (including bounded audio preparation) → English transcription ─┐
                                                            ├→ match → offsets → median → result
 subtitle file → parse → opted-in cue transforms → translate ┘
 ```
 
 ## Audio pipeline
 
-1. Extract or reuse cached, mono 16 kHz audio from only the first configured
-   `X` minutes of the movie. Audio preparation is an adapter beneath VAD, not a
-   synchronization decision.
-2. Run on-device VAD over that audio and return chronological voice-activity
-   windows.
-3. Transcribe those windows locally as English speech segments, retaining each
+1. The VAD stack extracts or reuses cached, mono 16 kHz audio from only the
+   first configured `X` minutes of the movie, then runs on-device VAD. Audio
+   preparation belongs to this stack; it is not an independent pipeline stage.
+2. VAD returns chronological voice-activity windows together with the prepared
+   audio. Orchestration selects each activity's audio region.
+3. The neighboring transcription stack's `EnglishTranscription` class
+   receives audio only and transcribes it locally as English speech segments,
+   retaining each
    segment's source timing and transcription confidence.
 
 ## Subtitle pipeline

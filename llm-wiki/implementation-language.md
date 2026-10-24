@@ -23,7 +23,7 @@ coverage](language-library-landscape.md).
 | Need | Candidate |
 | --- | --- |
 | Media extraction/resampling | FFmpeg.AutoGen, or a bundled FFmpeg executable |
-| Voice activity detection | Microsoft.ML.OnnxRuntime with a locally stored Silero VAD model |
+| Voice activity detection | TEN VAD through its native C ABI, using its local Linux/Windows runtime library |
 | SRT parsing and writing | SubtitlesParser |
 | Persian normalization | Persian.Plus |
 | Local Persian-to-English translation | LLamaSharp with the local Qwen2.5 1.5B Instruct Q4_K_M GGUF baseline |

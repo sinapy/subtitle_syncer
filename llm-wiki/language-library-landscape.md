@@ -3,7 +3,7 @@ type: Technology Evaluation
 title: Language library coverage for the synchronization pipeline
 description: Library availability across Python, C#, Rust, and Go for every approach stage.
 tags: [subtitle-syncing, libraries, python, csharp, rust, go]
-timestamp: 2026-10-23T00:00:00Z
+timestamp: 2026-10-24T00:00:00Z
 ---
 
 # Language library coverage
@@ -23,7 +23,7 @@ and return policy remain application logic.
 | # | Pipeline stage | Python | C# | Rust | Go |
 | --- | --- | --- | --- | --- | --- |
 | 1 | Extract/cache mono 16 kHz audio | [PyAV](https://pyav.basswood-io.com/) | [FFmpeg.AutoGen](https://github.com/Ruslan-B/FFmpeg.AutoGen) | [ffmpeg-next](https://github.com/kcking/rust-ffmpeg-next) | [go-astiav](https://github.com/asticode/go-astiav) |
-| 2 | Locate speech with VAD | [Silero VAD](https://github.com/snakers4/silero-vad) | [ONNX Runtime](https://github.com/microsoft/onnxruntime) with the Silero model | [fast-vad](https://docs.rs/fast-vad) or [webrtc-vad](https://crates.io/crates/webrtc-vad) | [go-webrtcvad](https://github.com/alex-savin/go-webrtcvad) |
+| 2 | Locate speech with VAD | [Silero VAD](https://github.com/snakers4/silero-vad) | [TEN VAD](https://github.com/TEN-framework/ten-vad) through its native C ABI | [fast-vad](https://docs.rs/fast-vad) or [webrtc-vad](https://crates.io/crates/webrtc-vad) | [go-webrtcvad](https://pkg.go.dev/github.com/mattn/go-webrtcvad) |
 | 3 | Parse and normalize Persian cues | [pysubs2](https://pysubs2.readthedocs.io/) + [Hazm](https://github.com/roshan-research/hazm) | [SubtitlesParser](https://github.com/AlexPoint/SubtitlesParser) + [Persian.Plus](https://www.nuget.org/packages/Persian.Plus) | [subparse](https://github.com/kaegi/subparse) + [yekdast](https://docs.rs/yekdast) | [go-astisub](https://github.com/asticode/go-astisub) + [persian](https://pkg.go.dev/github.com/amiranmanesh/persian) |
 | 4 | Exclude likely non-dialogue cues | `re` / `regex` | `System.Text.RegularExpressions` | [`regex`](https://docs.rs/regex) | [`regexp`](https://pkg.go.dev/regexp) |
 | 5 | Select early dialogue candidates | `itertools` / list slicing | LINQ | iterator adapters | slices / iterators |
@@ -53,9 +53,9 @@ implementation.
   task: `pysubs2`/Hazm/Argos Translate/faster-whisper/RapidFuzz, with PyAV or
   FFmpeg for media. Select CPU-supported model/runtime packages and a compact
   translation model for the baseline Windows path.
-- **C#** is similarly viable, especially in a .NET/Windows application, but
-  VAD is commonly an ONNX-model integration rather than a single dedicated
-  package.
+- **C#** is similarly viable, especially in a .NET/Windows application. The
+  selected implementation binds TEN VAD's local native C ABI; its runtime
+  packaging is recorded in [TEN VAD integration](ten-vad.md).
 - **Rust** and **Go** have full coverage, but media and transcription packages
   more often expose native FFmpeg, C/C++, or CGO build dependencies. They fit
   well when deployment footprint, concurrency, or a native service matters,
