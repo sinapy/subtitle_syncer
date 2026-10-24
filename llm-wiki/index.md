@@ -21,6 +21,8 @@ the project’s durable shared context.
   the Windows-first on-device baseline stack.
 - [Layered pipeline architecture](pipeline-architecture.md) — C# contracts,
   branch boundaries, and delivery order for a usable project.
+- [Local Persian-to-English translation](translation.md) — the independent,
+  CPU-only translation stack and model provisioning instructions.
 - [Software principles](software-principles.md) — rules for safe transformations,
   preserving source data, and avoiding brittle heuristics.
 

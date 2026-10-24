@@ -122,8 +122,8 @@ public interface ISubtitleReader
 
 public interface ITextTranslator
 {
-    IEnumerable<TranslatedCue> Translate(IEnumerable<DialogueCue> cues,
-        string sourceLanguage, string targetLanguage);
+    Task<IReadOnlyList<string>> TranslateAsync(IReadOnlyList<string> texts,
+        CancellationToken cancellationToken = default);
 }
 ```
 
@@ -142,10 +142,12 @@ matching cues. The project deliberately contains no heuristic classification
 of translator credits, title cards, or sound effects because those labels are
 too language- and context-dependent to safely discard.
 
-`ITextTranslator` is language-generic. For this product it is invoked with
-Persian (`fa`) to English (`en`) and must use a locally stored model through
-the chosen C# runtime. It receives only accepted dialogue cues and returns
-them in the same chronological order.
+`ITextTranslator` is an independent sibling of subtitle parsing. For this
+product `SubtitleSyncer.Translation` translates Persian to English with a
+locally stored GGUF model through the CPU LLamaSharp runtime. It receives text
+items rather than subtitle cues, returns the same number of items in the same
+order, and has no project reference to subtitle parsing. A later orchestration
+layer is responsible for associating translations with cues.
 
 ### Join and synchronization branch
 
@@ -204,5 +206,6 @@ implementations.
 
 - [Approach](approach.md)
 - [Implementation language](implementation-language.md)
+- [Local Persian-to-English translation](translation.md)
 - [Software principles](software-principles.md)
 - [Problem statement](problem-statement.md)

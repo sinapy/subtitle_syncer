@@ -54,6 +54,9 @@ coverage*/
 *.tmp
 *.temp
 
+# Locally provisioned on-device models
+models/
+
 # Media files
 *.avi
 *.mkv
