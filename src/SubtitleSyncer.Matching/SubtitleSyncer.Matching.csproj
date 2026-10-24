@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../SubtitleSyncer.SubtitleParsing.Client/SubtitleSyncer.SubtitleParsing.Client.csproj" />
+    <ProjectReference Include="../SubtitleSyncer.Translation/SubtitleSyncer.Translation.csproj" />
+    <ProjectReference Include="../SubtitleSyncer.Vad/SubtitleSyncer.Vad.csproj" />
+    <ProjectReference Include="../SubtitleSyncer.Transcription/SubtitleSyncer.Transcription.csproj" />
+  </ItemGroup>
+</Project>

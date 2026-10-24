@@ -5,9 +5,11 @@
   <Project Path="src/SubtitleSyncer.Audio/SubtitleSyncer.Audio.csproj" />
   <Project Path="src/SubtitleSyncer.Transcription/SubtitleSyncer.Transcription.csproj" />
   <Project Path="src/SubtitleSyncer.Vad/SubtitleSyncer.Vad.csproj" />
+  <Project Path="src/SubtitleSyncer.Matching/SubtitleSyncer.Matching.csproj" />
   <Project Path="tests/SubtitleSyncer.SubtitleParsing.Tests/SubtitleSyncer.SubtitleParsing.Tests.csproj" />
   <Project Path="tests/SubtitleSyncer.SubtitleParsing.Client.Tests/SubtitleSyncer.SubtitleParsing.Client.Tests.csproj" />
   <Project Path="tests/SubtitleSyncer.Translation.Tests/SubtitleSyncer.Translation.Tests.csproj" />
   <Project Path="tests/SubtitleSyncer.Vad.Tests/SubtitleSyncer.Vad.Tests.csproj" />
   <Project Path="tests/SubtitleSyncer.Transcription.Tests/SubtitleSyncer.Transcription.Tests.csproj" />
+  <Project Path="tests/SubtitleSyncer.Matching.Tests/SubtitleSyncer.Matching.Tests.csproj" />
 </Solution>

@@ -5,7 +5,7 @@ namespace SubtitleSyncer.SubtitleParsing.Tests;
 public sealed class SrtSubtitleReaderTests
 {
     [Fact]
-    public void Read_reads_legacy_Persian_fixture()
+    public void Read_reads_Persian_fixture()
     {
         var path = Path.Combine(AppContext.BaseDirectory, "data", "Shaun_Of_The_Dead.srt");
         var cues = new SrtSubtitleReader().Read(path).ToArray();
