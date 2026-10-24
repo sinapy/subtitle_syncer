@@ -1,3 +1,4 @@
+using SubtitleSyncer.Audio;
 using SubtitleSyncer.Vad;
 
 namespace SubtitleSyncer.Vad.Tests;

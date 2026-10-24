@@ -1,4 +1,4 @@
-namespace SubtitleSyncer.Vad;
+namespace SubtitleSyncer.Audio;
 
 /// <summary>Mono or multi-channel signed 16-bit PCM positioned on the movie timeline.</summary>
 public sealed record PcmAudio

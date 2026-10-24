@@ -1,5 +1,7 @@
 namespace SubtitleSyncer.Vad;
 
+using SubtitleSyncer.Audio;
+
 /// <summary>Movie-audio preparation owned by the VAD stack.</summary>
 public interface IAudioPreparation
 {

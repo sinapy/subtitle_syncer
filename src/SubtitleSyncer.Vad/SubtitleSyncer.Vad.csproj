@@ -6,6 +6,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../SubtitleSyncer.Audio/SubtitleSyncer.Audio.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="runtimes/**/*" CopyToOutputDirectory="PreserveNewest" />
     <None Update="licenses/**/*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

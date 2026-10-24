@@ -18,7 +18,9 @@ needs repeated enumeration.
 ## Project boundaries
 
 Each pipeline stack owns a C# project rather than accumulating in a shared
-`Core` project. The first stack is `SubtitleSyncer.SubtitleParsing`; it owns
+`Core` project. `SubtitleSyncer.Audio` is a deliberately small contract
+project for timeline-positioned PCM shared by the neighboring audio stacks.
+The first feature stack is `SubtitleSyncer.SubtitleParsing`; it owns
 the SRT reader contract, `SubtitleCue`, and SRT-specific implementation. Its
 tests live in `SubtitleSyncer.SubtitleParsing.Tests` and use xUnit.net v3.
 Shared test fixtures live under `tests/data`; subtitle fixtures there are
@@ -111,14 +113,27 @@ public sealed record VoiceActivityAnalysis(
 public interface IEnglishTranscriber
 {
     IEnumerable<SpeechSegment> Transcribe(PcmAudio audio);
+    IEnumerable<SpeechSegment> Transcribe(PcmAudio audio, TimeSpan start, TimeSpan end);
 }
 ```
 
 The baseline uses local FFmpeg and TEN VAD within VAD, and local Whisper.net
-in `EnglishTranscription`. TEN VAD is called through a small native C ABI
-adapter and consumes mono 16 kHz PCM in 160- or 256-sample frames. VAD output must be sorted,
+with its CPU runtime in `EnglishTranscription`. The transcription project
+references only `SubtitleSyncer.Audio`, converts its mono 16 kHz PCM to an
+in-memory WAV stream for Whisper, and translates each relative Whisper result
+back to the audio's absolute movie position. Whisper may report a final segment
+rounded to an internal processing block beyond a short input clip; the adapter
+clamps that final end time to the supplied PCM boundary. TEN VAD is called through a small
+native C ABI adapter and consumes mono 16 kHz PCM in 160- or 256-sample frames.
+VAD output must be sorted,
 non-overlapping, and bounded by `analysisDuration`; `EnglishTranscription`
 must preserve the absolute timeline positions from each activity.
+
+When calling the interval overload, orchestration passes the full prepared
+audio plus a VAD interval. `EnglishTranscription` includes two seconds of
+available audio on each side before inference, clamped to the prepared-audio
+boundary. This gives Whisper enough context for short utterances while all
+returned segment timestamps remain absolute.
 
 ### Subtitle branch
 
@@ -185,7 +200,8 @@ estimate is a normal result, not an exception.
 `SynchronizationService` is the sole composition root for the pipeline:
 
 1. Ask VAD to prepare bounded audio and detect activities. For each activity,
-   select its audio region and pass that audio to `EnglishTranscription`.
+   pass the prepared audio and activity interval to `EnglishTranscription` so
+   it can include its configured recognition context.
 2. Read the subtitle file, apply explicitly requested cue transforms, and
    translate the resulting cues.
 3. Pass both chronological sequences to the matcher, then pass matches to the
@@ -196,6 +212,11 @@ estimate is a normal result, not an exception.
 This makes it possible to unit-test every layer without FFmpeg or a model, use
 recorded fixtures for integration tests, and test the orchestration with fake
 implementations.
+
+Integration tests that require ignored local movies or model files remain in
+their owning test project and use xUnit v3's `Explicit = true` marker. They do
+not run in the default test pass; developers run them deliberately after
+provisioning their local fixtures.
 
 ## Delivery order
 

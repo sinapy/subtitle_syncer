@@ -1,5 +1,7 @@
 namespace SubtitleSyncer.Vad;
 
+using SubtitleSyncer.Audio;
+
 /// <summary>Local TEN VAD adapter for mono 16 kHz signed-16-bit PCM audio.</summary>
 public sealed class TenVadEngine(TenVadOptions? options = null) : IVadEngine
 {

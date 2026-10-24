@@ -1,5 +1,7 @@
 namespace SubtitleSyncer.Vad;
 
+using SubtitleSyncer.Audio;
+
 /// <summary>Coordinates VAD-owned audio preparation with a local VAD engine.</summary>
 public sealed class VoiceActivityDetector(IAudioPreparation audioPreparation, IVadEngine engine, VadOptions? options = null)
     : IVoiceActivityDetector

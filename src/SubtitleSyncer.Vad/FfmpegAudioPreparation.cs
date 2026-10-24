@@ -3,6 +3,8 @@ using System.Globalization;
 
 namespace SubtitleSyncer.Vad;
 
+using SubtitleSyncer.Audio;
+
 /// <summary>Uses a local FFmpeg executable to decode a bounded movie prefix to mono 16 kHz PCM.</summary>
 public sealed class FfmpegAudioPreparation(string ffmpegPath = "ffmpeg") : IAudioPreparation
 {

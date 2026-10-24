@@ -2,6 +2,7 @@
   <Project Path="src/SubtitleSyncer.SubtitleParsing/SubtitleSyncer.SubtitleParsing.csproj" />
   <Project Path="src/SubtitleSyncer.SubtitleParsing.Client/SubtitleSyncer.SubtitleParsing.Client.csproj" />
   <Project Path="src/SubtitleSyncer.Translation/SubtitleSyncer.Translation.csproj" />
+  <Project Path="src/SubtitleSyncer.Audio/SubtitleSyncer.Audio.csproj" />
   <Project Path="src/SubtitleSyncer.Vad/SubtitleSyncer.Vad.csproj" />
   <Project Path="tests/SubtitleSyncer.SubtitleParsing.Tests/SubtitleSyncer.SubtitleParsing.Tests.csproj" />
   <Project Path="tests/SubtitleSyncer.SubtitleParsing.Client.Tests/SubtitleSyncer.SubtitleParsing.Client.Tests.csproj" />
