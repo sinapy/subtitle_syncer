@@ -32,9 +32,10 @@ open.
 
 - [ ] Build and publish cleanly from a locked, documented dependency set; the
   release contains no developer-machine paths or untracked files.
-- [ ] The deployed .NET console, required native runtime files, Python
-  environment/application, trained `.pt` model, and FFmpeg are all included or
-  installed by a tested, documented installer/bootstrapper.
+- [ ] The deployed .NET sync console, ONNX model and JSON manifest, required
+  native runtime files, and FFmpeg are all included or installed by a tested,
+  documented installer/bootstrapper. Python is required only to train or
+  convert a model artifact.
 - [ ] The release has been smoke-tested from a clean Windows 10 and Windows 11
   machine with no GPU; CUDA is only an optional optimization.
 - [ ] The x64 TEN VAD DLL and all required LLVM runtime dependencies load from

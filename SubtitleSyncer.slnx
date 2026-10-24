@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="apps/SubtitleSyncer.Vad.Console/SubtitleSyncer.Vad.Console.csproj" />
+  <Project Path="apps/SubtitleSyncer.Sync.Console/SubtitleSyncer.Sync.Console.csproj" />
   <Project Path="src/SubtitleSyncer.Audio/SubtitleSyncer.Audio.csproj" />
   <Project Path="src/SubtitleSyncer.Vad/SubtitleSyncer.Vad.csproj" />
   <Project Path="tests/SubtitleSyncer.Vad.Tests/SubtitleSyncer.Vad.Tests.csproj" />

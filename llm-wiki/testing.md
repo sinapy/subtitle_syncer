@@ -11,7 +11,7 @@ timestamp: 2026-10-24T00:00:00Z
 Build the retained .NET VAD bridge and run its tests from the repository root:
 
 ```bash
-dotnet build src/SubtitleSyncer.Vad/SubtitleSyncer.Vad.csproj
+dotnet build SubtitleSyncer.slnx
 dotnet run --project tests/SubtitleSyncer.Vad.Tests --no-restore
 ```
 
@@ -26,6 +26,9 @@ the corresponding movie files remain ignored local fixtures. See
 inference commands.
 
 Generated activity JSON, models, and metrics belong under ignored `artifacts/`.
+After training or standalone conversion, validate the ONNX output against the
+PyTorch model before release and run an end-to-end `SubtitleSyncer.Sync.Console`
+check on the held-out local movie fixture.
 
 ## Related
 

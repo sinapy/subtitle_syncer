@@ -11,15 +11,15 @@ timestamp: 2026-10-24T00:00:00Z
 `installer/windows/Install-ExplorerContextMenu.ps1` adds a per-user Explorer
 verb for `.srt` files. The entry launches
 `installer/windows/Invoke-SubtitleSync.ps1` with the selected SRT path. That
-script asks the user to choose the movie, calls the existing
-`python/duration_alignment/sync.py` command, and creates a uniquely named
+script asks the user to choose the movie, calls the native
+`SubtitleSyncer.Sync.Console` command with the deployed ONNX model, and creates a uniquely named
 `-synced.srt` sibling from the returned correction. It does not modify the
 selected subtitle or display the offset/confidence.
 
 The installer writes only under `HKCU\Software\Classes`, so it does not need
 administrator access. Passing `-Remove` deletes the same verb. This integration
 is deliberately an adapter around the command-line boundary: no Explorer or
-presentation code belongs in the VAD or Python alignment layers.
+presentation code belongs in the VAD, Python training, or ONNX inference layers.
 
 ## Related
 

@@ -72,14 +72,15 @@ if ($dialog.ShowDialog() -ne [System.Windows.Forms.DialogResult]::OK) {
 }
 
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$syncScript = Join-Path $repositoryRoot 'python\duration_alignment\sync.py'
-if (-not (Test-Path -LiteralPath $syncScript)) {
-    [System.Windows.Forms.MessageBox]::Show("Could not find the synchronization command at:`n$syncScript", 'Subtitle Syncer', 'OK', 'Error') | Out-Null
+$syncProject = Join-Path $repositoryRoot 'apps\SubtitleSyncer.Sync.Console\SubtitleSyncer.Sync.Console.csproj'
+$modelPath = Join-Path $repositoryRoot 'artifacts\duration_alignment\model_60m_120s\duration_offset_model.onnx'
+if (-not (Test-Path -LiteralPath $syncProject) -or -not (Test-Path -LiteralPath $modelPath)) {
+    [System.Windows.Forms.MessageBox]::Show("Could not find the .NET synchronization command or ONNX model.`n`nExpected model:`n$modelPath", 'Subtitle Syncer', 'OK', 'Error') | Out-Null
     exit 1
 }
 
 try {
-    $output = & python $syncScript --video $dialog.FileName --subtitles $SubtitlePath 2>&1
+    $output = & dotnet run --project $syncProject -- --video $dialog.FileName --subtitles $SubtitlePath --model $modelPath --device auto 2>&1
     if ($LASTEXITCODE -ne 0) { throw ($output | Out-String) }
     $result = $output | Out-String | ConvertFrom-Json
     $source = Read-SubtitleText $SubtitlePath

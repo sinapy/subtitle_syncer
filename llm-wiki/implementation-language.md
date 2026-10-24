@@ -1,30 +1,30 @@
 ---
 type: Architecture Decision
-title: Python alignment with a minimal .NET VAD bridge
-description: Use Python for duration alignment and retain .NET only for local VAD extraction.
-tags: [architecture, python, dotnet, vad, on-device]
+title: Python training with native .NET inference
+description: Train in Python and deploy duration alignment in .NET through ONNX Runtime.
+tags: [architecture, python, dotnet, onnx, vad, on-device]
 timestamp: 2026-10-24T00:00:00Z
 ---
 
-# Python alignment with a minimal .NET VAD bridge
+# Python training with native .NET inference
 
-**Decision:** The synchronization model and orchestration are Python. The
-repository retains a small .NET utility solely to prepare movie audio with
-FFmpeg and export local TEN VAD activity intervals.
+**Decision:** Python trains the synchronization model and emits a portable
+ONNX inference artifact. The deployed synchronization host is the .NET
+`SubtitleSyncer.Sync.Console` using ONNX Runtime; the VAD library prepares
+movie audio with FFmpeg and obtains local TEN VAD activity intervals.
 
 ## Supported stack
 
 | Need | Implementation |
 | --- | --- |
-| Subtitle timing parsing and offset search | Python `duration_alignment` scripts |
-| Model training and inference | PyTorch, using CUDA when available and CPU otherwise |
-| Media extraction and VAD | .NET `SubtitleSyncer.Vad` with FFmpeg and TEN VAD |
-| Python/.NET boundary | JSON exported by `SubtitleSyncer.Vad.Console` |
+| Subtitle timing parsing and offset search | .NET `SubtitleSyncer.Sync.Console`; Python retains equivalent trainer scripts |
+| Model training | PyTorch, using CUDA when available and CPU otherwise |
+| Deployed model inference | ONNX Runtime in .NET; CPU by default, CUDA execution provider optional |
+| Media extraction and VAD | .NET `SubtitleSyncer.Vad` with FFmpeg and TEN VAD; the VAD console exports training activity JSON |
+| Training/deployment boundary | ONNX model plus JSON inference manifest |
 
-The .NET projects must remain limited to `SubtitleSyncer.Audio`,
-`SubtitleSyncer.Vad`, and `SubtitleSyncer.Vad.Console`; they do not parse
-subtitles or perform translation, transcription, text matching, or offset
-estimation.
+The ONNX model consumes only numerical timing features. No deployed component
+needs subtitle text, transcription, translation, network access, or CUDA.
 
 ## Related
 

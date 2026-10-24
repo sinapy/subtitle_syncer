@@ -1,3 +1,4 @@
 # CPU wheel by default. Install a CUDA-specific torch wheel when CUDA is available.
 numpy>=2.0
 torch>=2.4
+onnx>=1.16

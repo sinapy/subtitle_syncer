@@ -1,36 +1,37 @@
 ---
 type: Technical Design
-title: Python duration-alignment architecture
+title: Local duration-alignment architecture
 description: Data flow and component boundaries for automatic constant-offset estimation.
-tags: [architecture, python, vad, constant-offset]
+tags: [architecture, python, dotnet, onnx, vad, constant-offset]
 timestamp: 2026-10-24T00:00:00Z
 ---
 
-# Python duration-alignment architecture
+# Local duration-alignment architecture
 
 The automatic pipeline has two inputs: chronological SRT cue intervals and
-chronological VAD activity intervals. The Python layer is the only component
-that joins the two timelines and estimates an offset.
+chronological VAD activity intervals. The deployed .NET layer joins the two
+timelines and estimates an offset. Python is retained for training and
+exporting the model to ONNX.
 
 ```text
 movie
   ↓
-.NET VAD console (FFmpeg + TEN VAD)
-  ↓ activity JSON: analysis_seconds, activities[start_seconds, end_seconds]
-Python sync.py + SRT intervals + local PyTorch model
+.NET VAD library (FFmpeg + TEN VAD)
+  ↓ chronological activity intervals
+.NET sync console + SRT intervals + local ONNX Runtime model
   ↓
 offset_seconds and confidence
 ```
 
-`sync.py` calls `apps/SubtitleSyncer.Vad.Console` with a movie path, an
-analysis duration, and a temporary export path. The exporter writes the JSON
-activity timeline. Python filters subtitle cues to the same duration, evaluates
-candidate constant offsets, and reports a result without modifying the source
-subtitle file.
+`apps/SubtitleSyncer.Sync.Console` calls the VAD library with a movie path and
+an analysis duration. It filters subtitle cues to the same duration, evaluates
+candidate constant offsets in batches through ONNX Runtime, and reports a
+result without modifying the source subtitle file. `--device auto` attempts
+CUDA and falls back to CPU; `--device cpu` never initializes CUDA.
 
-The retained .NET boundary has no dependency on Python. `SubtitleSyncer.Audio`
-holds the PCM timeline contract, `SubtitleSyncer.Vad` owns FFmpeg preparation
-and TEN VAD, and `SubtitleSyncer.Vad.Console` serializes the activity result.
+`SubtitleSyncer.Audio` holds the PCM timeline contract, `SubtitleSyncer.Vad`
+owns FFmpeg preparation and TEN VAD, and the sync console owns SRT parsing and
+ONNX inference. The C# runtime has no dependency on Python.
 
 ## Related
 

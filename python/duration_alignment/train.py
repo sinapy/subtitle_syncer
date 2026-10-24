@@ -21,6 +21,7 @@ from torch import nn
 
 SEED = 20261024
 FEATURE_NAMES = ["subtitle_speech_overlap", "speech_coverage", "duration_agreement", "cue_support", "mean_overlap", "activity_density"]
+ONNX_OPSET_VERSION = 17
 
 
 @dataclass(frozen=True)
@@ -147,6 +148,62 @@ class OffsetNet(nn.Module):
         return self.layers(x).squeeze(-1)
 
 
+class NormalizedOffsetNet(nn.Module):
+    """Inference wrapper which accepts raw, unnormalized feature vectors."""
+
+    def __init__(self, model: OffsetNet, mean: np.ndarray, std: np.ndarray):
+        super().__init__()
+        self.model = model
+        self.register_buffer("mean", torch.from_numpy(mean.astype(np.float32)))
+        self.register_buffer("std", torch.from_numpy(std.astype(np.float32)))
+
+    def forward(self, features):
+        return self.model((features - self.mean) / self.std)
+
+
+def require_onnx() -> None:
+    try:
+        import onnx  # noqa: F401  # Required by the PyTorch ONNX exporter.
+    except ImportError as error:
+        raise RuntimeError("ONNX export requires the 'onnx' package. Install python/duration_alignment/requirements.txt.") from error
+
+
+def export_onnx(model: OffsetNet, mean: np.ndarray, std: np.ndarray, output: Path, calibration_bias: float) -> None:
+    """Export a portable inference graph plus its non-model inference contract."""
+    require_onnx()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    inference_model = NormalizedOffsetNet(model.cpu(), mean, std).eval()
+    example = torch.zeros((1, len(FEATURE_NAMES)), dtype=torch.float32)
+    torch.onnx.export(
+        inference_model,
+        example,
+        output,
+        input_names=["features"],
+        output_names=["logits"],
+        dynamic_axes={"features": {0: "candidate_count"}, "logits": {0: "candidate_count"}},
+        opset_version=ONNX_OPSET_VERSION,
+        # The legacy exporter is stable across our supported torch versions and
+        # only requires the lightweight `onnx` package (not onnxscript).
+        dynamo=False,
+    )
+    manifest = {
+        "schema_version": 1,
+        "model_file": output.name,
+        "input": {"name": "features", "data_type": "float32", "shape": ["candidate_count", len(FEATURE_NAMES)]},
+        "output": {"name": "logits", "data_type": "float32", "shape": ["candidate_count"]},
+        "feature_names": FEATURE_NAMES,
+        "calibration_bias_seconds": calibration_bias,
+        "candidate_search": {
+            "coarse_start_seconds": -120.0,
+            "coarse_end_seconds": 120.0,
+            "coarse_step_seconds": 0.25,
+            "fine_radius_seconds": 0.25,
+            "fine_step_seconds": 0.01,
+        },
+    }
+    output.with_suffix(".json").write_text(json.dumps(manifest, indent=2) + "\n")
+
+
 def train_model(train_x, train_y, val_x, val_y, device: torch.device):
     mean, std = train_x.mean(axis=0), train_x.std(axis=0)
     std = np.where(std < 1e-6, 1.0, std)
@@ -226,7 +283,11 @@ def main() -> int:
     parser.add_argument("--activities", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--chunk-seconds", type=int, default=60)
+    parser.add_argument("--no-onnx-export", action="store_true",
+                        help="Do not export the C#-consumable ONNX inference artifact.")
     args = parser.parse_args()
+    if not args.no_onnx_export:
+        require_onnx()
     random.seed(SEED); np.random.seed(SEED); torch.manual_seed(SEED)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     duration, speech = read_activities(args.activities)
@@ -254,6 +315,8 @@ def main() -> int:
         "calibration_bias_seconds": bias,
         "feature_names": FEATURE_NAMES,
     }, args.output / "duration_offset_model.pt")
+    if not args.no_onnx_export:
+        export_onnx(model, mean, std, args.output / "duration_offset_model.onnx", bias)
     (args.output / "metrics.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
     # Hold-out gate: a model that fits augmentation but misses unseen chronology is rejected.

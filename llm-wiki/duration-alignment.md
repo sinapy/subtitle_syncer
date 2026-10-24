@@ -12,8 +12,8 @@ timestamp: 2026-10-24T00:00:00Z
 synchronization path. It consumes only chronological subtitle and VAD activity
 intervals; it never receives subtitle text, audio samples, translations, or
 transcriptions. It uses PyTorch; CUDA is selected when available, otherwise it
-uses CPU. `SubtitleSyncer.Vad.Console` only exports local VAD activity JSON for
-the Python workflow; it does not estimate an offset.
+uses CPU. `SubtitleSyncer.Vad.Console` exports local VAD activity JSON for the
+Python training workflow; inference does not use Python.
 
 For an offset candidate, it shifts every cue and measures three features:
 
@@ -27,16 +27,21 @@ dropout, AdamW, and validation-based early stopping). Each synthetic sample
 shifts a bounded subtitle chunk by a known amount in `[-120, +120]` seconds.
 The inverse shift is the positive label; near misses and broad wrong offsets
 are negative examples. At inference it searches a bounded range coarsely and
-refines the best peak at 10 ms resolution. The artifact is a local `.pt` file
-containing model weights, feature normalization, and a calibration bias.
+refines the best peak at 10 ms resolution. Training produces a local `.pt`
+file and a portable ONNX inference artifact. The ONNX graph accepts raw
+six-feature `float32` vectors and performs the training-time normalization
+inside the graph. Its adjacent `duration_offset_model.json` manifest records
+the feature order, logit input/output names, calibration bias, and fixed
+coarse-to-fine candidate search settings. A .NET host uses ONNX Runtime to
+evaluate batches of candidates and applies sigmoid to the returned logits.
 
 ## Westworld bootstrap corpus
 
 `tests/data/westworld-duration-training.json` declares ten reproducible
 one-minute synthetic samples from the known-aligned Westworld S01E01 fixture.
 It records each bounded timeline region and the manual subtitle shift applied
-to it; it does not duplicate the subtitle file or movie. The C# console can
-export the local TEN VAD activity timeline as JSON for Python:
+to it; it does not duplicate the subtitle file or movie. The VAD console can
+export the local TEN VAD activity timeline as JSON for Python training:
 
 ```bash
 mkdir -p artifacts/duration_alignment
@@ -53,22 +58,63 @@ python3 python/duration_alignment/predict.py \
   --model artifacts/duration_alignment/model/duration_offset_model.pt
 ```
 
-## Test any movie/subtitle pair
+The trainer emits `duration_offset_model.onnx` and
+`duration_offset_model.json` beside the existing `.pt` and `metrics.json`
+files. Use `--no-onnx-export` only for Python-only experimentation; production
+packaging should ship the ONNX file and manifest rather than a Python runtime.
 
-After the bootstrap model has been trained, supply just the two files to the
-single-command runner. It performs temporary local VAD extraction and prints
-the constant correction in seconds. Add the printed `offset_seconds` value to
-every subtitle timestamp.
+## Convert an existing model without retraining
+
+Conversion uses the existing `.pt` artifact's weights, feature normalization,
+and calibration bias. It does not read media or run training. Install the
+Python training requirements (including `onnx`) once, then run:
 
 ```bash
-python3 python/duration_alignment/sync.py \
+python3 python/duration_alignment/export_onnx.py \
+  --model artifacts/duration_alignment/model_60m_120s/duration_offset_model.pt
+```
+
+This writes these two inseparable deployment files beside the `.pt` artifact:
+
+- `duration_offset_model.onnx` — normalized model graph;
+- `duration_offset_model.json` — feature order, calibration bias, and search settings.
+
+If the native console reports that the ONNX model and adjacent manifest must
+exist, convert the `.pt` file at the model location you passed to `--model`.
+For a different trained model, substitute that model's `.pt` path in the
+conversion command.
+
+The native host needs both output files:
+
+```bash
+dotnet run --project apps/SubtitleSyncer.Sync.Console -- \
   --video /path/to/movie.mkv \
-  --subtitles /path/to/subtitles.srt
+  --subtitles /path/to/subtitles.srt \
+  --model artifacts/duration_alignment/model_60m_120s/duration_offset_model.onnx \
+  --device auto
+```
+
+`--device auto` attempts CUDA then reliably falls back to CPU. `--device cpu`
+forces CPU; `--device cuda` fails clearly if CUDA is unavailable.
+
+## Test any movie/subtitle pair
+
+After the bootstrap model has been trained and converted, supply the movie,
+subtitle file, and ONNX model to the native runner. It performs local VAD
+extraction and prints the constant correction in seconds. Add the printed
+`offset_seconds` value to every subtitle timestamp.
+
+```bash
+dotnet run --project apps/SubtitleSyncer.Sync.Console -- \
+  --video /path/to/movie.mkv \
+  --subtitles /path/to/subtitles.srt \
+  --model artifacts/duration_alignment/model_60m_120s/duration_offset_model.onnx \
+  --device auto
 ```
 
 It analyses the first hour by default; use `--analysis-seconds` to bound a
-longer movie or speed up an experiment, and `--model` to choose another local
-`.pt` artifact.
+longer movie or speed up an experiment, and use a separately converted ONNX
+artifact to choose another model.
 
 The trainer partitions contiguous chunks chronologically into 60% train, 20%
 validation, and 20% test. Augmented variants never cross those partitions. It
@@ -82,7 +128,8 @@ translation or Whisper models.
 The source video and subtitle file **must already be correctly aligned**. A
 synthetic shift has a trustworthy label only when zero offset is known to be
 correct. Do not train from a subtitle file whose offset you are trying to
-discover; use the existing trained model with `sync.py` for that case.
+discover; use an existing converted ONNX model with the native sync console
+for that case.
 
 Given a new known-good pair, run the same scripts used for Westworld, replacing
 the paths and output directory:
@@ -121,7 +168,7 @@ fails.
 
 The S01E05 movie/subtitle pair was not used in the Westworld S01E01 bootstrap
 training. A manual review identified a good correction in the −2.9 to −2.6
-second range. Running `sync.py` on its first 1,800 seconds produced −2.6514
+second range. Running the duration-alignment workflow on its first 1,800 seconds produced −2.6514
 seconds with 84.1% model confidence (543 VAD activities and 420 cues), inside
 that manually established range. Keep S01E05 out of future training data if it
 is to remain an independent regression check.

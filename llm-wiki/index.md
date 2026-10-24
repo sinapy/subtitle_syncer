@@ -14,8 +14,8 @@ the project’s durable shared context.
 ## Core context
 
 - [Problem statement](problem-statement.md) — the user problem this project is meant to solve.
-- [Approach](approach.md) — the Python-first duration-only synchronization workflow.
-- [Implementation language](implementation-language.md) — Python alignment with a minimal .NET VAD bridge.
+- [Approach](approach.md) — the native .NET duration-only synchronization workflow.
+- [Implementation language](implementation-language.md) — Python training with native .NET/ONNX inference.
 - [Layered pipeline architecture](pipeline-architecture.md) — boundaries and data flow of the supported path.
 - [TEN VAD integration](ten-vad.md) — selected local VAD runtime, packaging, and license considerations.
 - [Duration-only alignment](duration-alignment.md) — local constant-offset estimation from subtitle and VAD timing.
