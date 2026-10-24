@@ -46,6 +46,14 @@ model, preserves meaningful internal line breaks in the model result, and
 rejects null list entries. The application must dispose the translator when it
 is no longer needed so model memory and native resources are released.
 
+The translation prompt is deliberately subtitle-specific: it asks for direct,
+dialogue-ready English, preserves speaker turns and names, and prohibits
+explanations or refusals. A non-English or explicit refusal response receives
+one stricter retry with the original source text. This narrowly addresses
+instruction-model failure without silently changing a normal model result; the
+matcher remains responsible for deciding whether a translation is useful timing
+evidence.
+
 After the GGUF has been placed on disk, inference does not use a network,
 server, CUDA installation, or a dedicated GPU.
 

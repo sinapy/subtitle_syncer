@@ -28,6 +28,29 @@ public sealed partial class LocalRuntimeIntegrationTests
         Assert.Matches("[A-Za-z]", translation);
     }
 
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async Task TranslateAsync_translates_the_matching_fixture_last_orders_cue()
+    {
+        var root = FindRepositoryRoot();
+        var modelPath = Environment.GetEnvironmentVariable("TRANSLATION_MODEL_PATH") ??
+            Path.Combine(root, "models", "qwen2.5-1.5b-instruct-q4_k_m.gguf");
+        Assert.True(File.Exists(modelPath), $"Required local translation model was not found: {modelPath}");
+
+        using var translator = new PersianEnglishTranslator(new TranslationOptions(modelPath)
+        {
+            ContextSize = 1024,
+            MaxOutputTokens = 64,
+        });
+
+        var translation = Assert.Single(await translator.TranslateAsync(
+            ["آخرين سفارشات ، لطفا ..."], TestContext.Current.CancellationToken));
+
+        Assert.DoesNotMatch(PersianCharacter(), translation);
+        Assert.Contains("order", translation, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("please", translation, StringComparison.OrdinalIgnoreCase);
+    }
+
     [GeneratedRegex("[\u0600-\u06FF]")]
     private static partial Regex PersianCharacter();
 

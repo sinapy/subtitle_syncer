@@ -16,6 +16,7 @@ public sealed class PersianEnglishTranslatorTests
         Assert.Equal(2, engine.Prompts.Count);
         Assert.Contains("سلام", engine.Prompts[0]);
         Assert.Contains("حال شما چطور است؟", engine.Prompts[1]);
+        Assert.Contains("dialogue-ready English", engine.Prompts[0]);
     }
 
     [Fact]
@@ -35,6 +36,20 @@ public sealed class PersianEnglishTranslatorTests
         IReadOnlyList<string> input = [null!];
 
         await Assert.ThrowsAsync<ArgumentException>(() => translator.TranslateAsync(input, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task TranslateAsync_retries_a_refusal_with_a_stricter_translation_prompt()
+    {
+        using var engine = new RecordingEngine("We will not translate the subtitle text.", "Last orders, please.");
+        using var translator = new PersianEnglishTranslator(engine);
+
+        var result = await translator.TranslateAsync(["آخرين سفارشات، لطفا..."], TestContext.Current.CancellationToken);
+
+        Assert.Equal("Last orders, please.", Assert.Single(result));
+        Assert.Equal(2, engine.Prompts.Count);
+        Assert.Contains("previous response was not an English translation", engine.Prompts[1]);
+        Assert.Contains("آخرين سفارشات", engine.Prompts[1]);
     }
 
     private sealed class RecordingEngine(params string[] responses) : ITextGenerationEngine

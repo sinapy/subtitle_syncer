@@ -7,9 +7,17 @@ namespace SubtitleSyncer.Translation;
 public sealed class PersianEnglishTranslator : ITextTranslator, IDisposable
 {
     private const string TranslationInstruction = """
-        Translate the Persian subtitle text below into natural English. Return only the translation.
-        Preserve names, numbers, punctuation, and line breaks when they carry dialogue meaning.
-        Do not explain the translation and do not add labels or quotation marks.
+        Translate every Persian subtitle line below into natural, dialogue-ready English.
+        The result will be compared with an English speech transcript, so preserve the spoken meaning
+        faithfully and prefer a direct translation over paraphrase. Preserve names, numbers,
+        punctuation, speaker turns, and meaningful line breaks. Render Persian names in Latin script.
+        Return only the English translation. Never explain, summarize, refuse, or describe the task.
+        Persian subtitle text:
+        """;
+
+    private const string RetryInstruction = """
+        Your previous response was not an English translation. Translate the Persian subtitle now.
+        Return only its English dialogue, including every line. Do not discuss the request.
         Persian subtitle text:
         """;
 
@@ -46,9 +54,19 @@ public sealed class PersianEnglishTranslator : ITextTranslator, IDisposable
             cancellationToken.ThrowIfCancellationRequested();
 
             // An empty subtitle needs no inference, but still retains its position in the result.
-            translations[index] = string.IsNullOrWhiteSpace(text)
-                ? text
-                : (await engine.GenerateAsync(BuildPrompt(text), cancellationToken).ConfigureAwait(false)).Trim();
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                translations[index] = text;
+                continue;
+            }
+
+            var translation = (await engine.GenerateAsync(BuildPrompt(text), cancellationToken).ConfigureAwait(false)).Trim();
+            if (!IsUsableEnglishTranslation(translation))
+            {
+                translation = (await engine.GenerateAsync(BuildRetryPrompt(text), cancellationToken).ConfigureAwait(false)).Trim();
+            }
+
+            translations[index] = translation;
         }
 
         return translations;
@@ -69,4 +87,19 @@ public sealed class PersianEnglishTranslator : ITextTranslator, IDisposable
     }
 
     private static string BuildPrompt(string text) => $"{TranslationInstruction}\n<subtitle>\n{text}\n</subtitle>";
+
+    private static string BuildRetryPrompt(string text) => $"{RetryInstruction}\n<subtitle>\n{text}\n</subtitle>";
+
+    private static bool IsUsableEnglishTranslation(string translation)
+    {
+        if (string.IsNullOrWhiteSpace(translation) || !translation.Any(character => character is >= 'A' and <= 'Z' or >= 'a' and <= 'z'))
+        {
+            return false;
+        }
+
+        return !translation.Contains("cannot translate", StringComparison.OrdinalIgnoreCase) &&
+            !translation.Contains("can't translate", StringComparison.OrdinalIgnoreCase) &&
+            !translation.Contains("will not translate", StringComparison.OrdinalIgnoreCase) &&
+            !translation.Contains("unable to translate", StringComparison.OrdinalIgnoreCase);
+    }
 }

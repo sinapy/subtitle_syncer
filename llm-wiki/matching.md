@@ -68,6 +68,16 @@ transcription, subtitle parsing, translation, alignment, and offset estimation.
 Set `MATCHING_DEBUG=1` to additionally print every detected activity window,
 transcribed segment, selected source cue, translation, and accepted alignment.
 
+`apps/SubtitleSyncer.Review.Web` is the manual alternative when lexical
+matching is not trustworthy. It presents the original Persian cues and their
+English translations beside the timestamped English transcription at
+`http://127.0.0.1:5088`. A reviewer selects exactly one cue and one speech
+segment, confirms the pair, and receives `speech.Start - cue.Start` as the
+offset. The review path performs no automatic text matching and never rewrites
+the subtitle file. Run it locally from the repository root with
+`dotnet run --project apps/SubtitleSyncer.Review.Web`; it prepopulates the
+available Shaun of the Dead fixture paths and accepts other local paths.
+
 ## Related
 
 - [Layered pipeline architecture](pipeline-architecture.md)
