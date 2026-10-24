@@ -35,28 +35,75 @@ public sealed class SubtitleSpeechMatcher
         string moviePath,
         string subtitlePath,
         TimeSpan? analysisDuration = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IProgress<MatchingProgress>? progress = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(moviePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(subtitlePath);
         cancellationToken.ThrowIfCancellationRequested();
 
+        progress?.Report(new MatchingProgress("Audio analysis", "Preparing audio and detecting speech."));
         var analysis = voiceActivityDetector.Analyze(moviePath, analysisDuration, cancellationToken);
+        progress?.Report(new MatchingProgress("Audio analysis",
+            $"Detected {analysis.Activities.Count} speech activity window(s) in {analysis.Audio.Duration}."));
+        foreach (var activity in analysis.Activities)
+        {
+            progress?.Report(new MatchingProgress("Audio analysis",
+                $"Speech window {activity.Start} to {activity.End}.", IsDetail: true));
+        }
+
+        progress?.Report(new MatchingProgress("Transcription", "Transcribing detected speech."));
         var speech = TranscribeActivities(analysis, cancellationToken);
+        progress?.Report(new MatchingProgress("Transcription", $"Produced {speech.Count} speech segment(s)."));
+        foreach (var segment in speech)
+        {
+            progress?.Report(new MatchingProgress("Transcription",
+                $"{segment.Start} to {segment.End}: {segment.Text}", IsDetail: true));
+        }
+
+        progress?.Report(new MatchingProgress("Subtitle parsing", "Reading eligible subtitle cues."));
         var cues = subtitleParser.Read(subtitlePath)
             .ExcludeHtmlTag()
             .ExcludeUrls()
             .ExcludeEmpty()
+            .Where(cue => cue.Start < analysis.Audio.End && cue.End > analysis.Audio.Start)
             .OrderBy(cue => cue.Start)
             .ThenBy(cue => cue.Index)
+            .Take(50)
             .ToArray();
+        progress?.Report(new MatchingProgress("Subtitle parsing", $"Selected {cues.Length} cue(s) for translation."));
+        foreach (var cue in cues)
+        {
+            progress?.Report(new MatchingProgress("Subtitle parsing",
+                $"Cue {cue.Index}, {cue.Start} to {cue.End}: {cue.Text}", IsDetail: true));
+        }
+
+        progress?.Report(new MatchingProgress("Translation", $"Translating {cues.Length} cue(s)."));
         var translations = await translator.TranslateAsync(cues.Select(cue => cue.Text).ToArray(), cancellationToken);
         if (translations.Count != cues.Length)
         {
             throw new InvalidOperationException("The translator must return one item for every supplied subtitle cue.");
         }
 
-        return FindOrderedMatches(cues, translations, speech);
+        progress?.Report(new MatchingProgress("Translation", "Translation complete."));
+        for (var index = 0; index < cues.Length; index++)
+        {
+            progress?.Report(new MatchingProgress("Translation",
+                $"Cue {cues[index].Index}: {translations[index]}", IsDetail: true));
+        }
+        progress?.Report(new MatchingProgress("Alignment", "Finding chronological text matches."));
+
+        var matches = FindOrderedMatches(cues, translations, speech);
+        progress?.Report(new MatchingProgress("Alignment", $"Found {matches.Count} match(es)."));
+        foreach (var match in matches)
+        {
+            progress?.Report(new MatchingProgress("Alignment",
+                $"Cue {match.Cue.Index} at {match.Cue.Start} matched speech at {match.Speech.Start}; " +
+                $"confidence {match.Confidence:P2}; translated: {match.Translation}; heard: {match.Speech.Text}",
+                IsDetail: true));
+        }
+
+        return matches;
     }
 
     private List<SpeechSegment> TranscribeActivities(VoiceActivityAnalysis analysis, CancellationToken cancellationToken)
@@ -93,7 +140,10 @@ public sealed class SubtitleSpeechMatcher
         {
             for (var speechIndex = 0; speechIndex < columns; speechIndex++)
             {
-                var score = FuzzyTextSimilarity.Score(translations[cueIndex], speech[speechIndex].Text);
+                var score = FuzzyTextSimilarity.HasMinimumContent(
+                    translations[cueIndex], speech[speechIndex].Text, options.MinimumTextLength)
+                    ? FuzzyTextSimilarity.Score(translations[cueIndex], speech[speechIndex].Text)
+                    : 0;
                 scores[cueIndex, speechIndex] = score;
                 var matched = score >= options.MinimumConfidence
                     ? dp[cueIndex, speechIndex] + score

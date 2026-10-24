@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/SubtitleSyncer.Matching.Client/SubtitleSyncer.Matching.Client.csproj" />
+    <ProjectReference Include="../../src/SubtitleSyncer.SubtitleParsing.Client/SubtitleSyncer.SubtitleParsing.Client.csproj" />
+    <ProjectReference Include="../../src/SubtitleSyncer.Translation/SubtitleSyncer.Translation.csproj" />
+    <ProjectReference Include="../../src/SubtitleSyncer.Transcription/SubtitleSyncer.Transcription.csproj" />
+    <ProjectReference Include="../../src/SubtitleSyncer.Vad/SubtitleSyncer.Vad.csproj" />
+  </ItemGroup>
+</Project>

@@ -17,6 +17,7 @@ public sealed class MatchingClient
         string moviePath,
         string subtitlePath,
         TimeSpan? analysisDuration = null,
-        CancellationToken cancellationToken = default) =>
-        matcher.MatchAsync(moviePath, subtitlePath, analysisDuration, cancellationToken);
+        CancellationToken cancellationToken = default,
+        IProgress<MatchingProgress>? progress = null) =>
+        matcher.MatchAsync(moviePath, subtitlePath, analysisDuration, cancellationToken, progress);
 }

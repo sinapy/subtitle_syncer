@@ -44,7 +44,29 @@ matcher. Its `MatchingClient.MatchAsync()` delegates matching to
 matches that calculates `Speech.Start - Cue.Start` for each match, sorts those
 offsets, and returns their median (the average of the two middle offsets for
 an even count). It rejects an empty match sequence because no offset can be
-inferred.
+inferred. `TryGetMedianOffset()` is the synchronization-safe alternative: it
+requires at least three offsets within a two-second tolerance before returning
+a value.
+
+The matcher only considers cues overlapping the bounded audio-analysis window.
+Its default five-character minimum normalized text length prevents short names
+and interjections from becoming timing evidence; callers can adjust that
+threshold through `MatchingOptions`.
+
+`apps/SubtitleSyncer.Matching.Console` demonstrates the full local pipeline. By
+default it matches the movie and Persian SRT under `tests/data` using the local
+Whisper and translation models under `models`. Run it from the repository root
+with `dotnet run --project apps/SubtitleSyncer.Matching.Console`; optional
+arguments override the movie path, subtitle path, and analysis duration in
+seconds. `TRANSCRIPTION_MODEL_PATH` and `TRANSLATION_MODEL_PATH` override model
+locations.
+
+The console keeps its output readable by configuring the translation runtime to
+emit only native errors. It passes an `IProgress<MatchingProgress>` callback to
+the client, which reports model-independent stages: audio analysis,
+transcription, subtitle parsing, translation, alignment, and offset estimation.
+Set `MATCHING_DEBUG=1` to additionally print every detected activity window,
+transcribed segment, selected source cue, translation, and accepted alignment.
 
 ## Related
 

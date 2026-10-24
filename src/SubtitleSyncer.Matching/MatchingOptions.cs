@@ -6,6 +6,9 @@ public sealed record MatchingOptions
     /// <summary>Minimum normalized fuzzy-text score required to emit a match.</summary>
     public double MinimumConfidence { get; init; } = 0.70;
 
+    /// <summary>Minimum normalized character count required from both texts for a timing match.</summary>
+    public int MinimumTextLength { get; init; } = 5;
+
     internal void Validate()
     {
         if (MinimumConfidence is < 0 or > 1)
@@ -13,5 +16,9 @@ public sealed record MatchingOptions
             throw new ArgumentOutOfRangeException(nameof(MinimumConfidence));
         }
 
+        if (MinimumTextLength < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(MinimumTextLength));
+        }
     }
 }

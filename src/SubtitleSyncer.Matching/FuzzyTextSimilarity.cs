@@ -23,6 +23,10 @@ public static partial class FuzzyTextSimilarity
         return 1 - (double)distance / Math.Max(normalizedLeft.Length, normalizedRight.Length);
     }
 
+    /// <summary>Returns whether both texts contain enough normalized content for a timing match.</summary>
+    public static bool HasMinimumContent(string left, string right, int minimumLength) =>
+        Normalize(left).Length >= minimumLength && Normalize(right).Length >= minimumLength;
+
     private static string Normalize(string text)
     {
         ArgumentNullException.ThrowIfNull(text);

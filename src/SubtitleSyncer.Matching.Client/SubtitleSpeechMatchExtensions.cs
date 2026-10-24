@@ -6,6 +6,45 @@ namespace SubtitleSyncer.Matching.Client;
 public static class SubtitleSpeechMatchExtensions
 {
     /// <summary>
+    /// Tries to get a median offset from a cluster of consistent measurements.
+    /// </summary>
+    public static bool TryGetMedianOffset(
+        this IEnumerable<SubtitleSpeechMatch> matches,
+        out TimeSpan offset,
+        TimeSpan? tolerance = null,
+        int requiredMatchCount = 3)
+    {
+        ArgumentNullException.ThrowIfNull(matches);
+        if (requiredMatchCount < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(requiredMatchCount));
+        }
+
+        var maximumDifference = tolerance ?? TimeSpan.FromSeconds(2);
+        if (maximumDifference < TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(tolerance));
+        }
+
+        var offsets = matches
+            .Select(match => match.Speech.Start - match.Cue.Start)
+            .Order()
+            .ToArray();
+        for (var start = 0; start <= offsets.Length - requiredMatchCount; start++)
+        {
+            var end = start + requiredMatchCount - 1;
+            if (offsets[end] - offsets[start] <= maximumDifference)
+            {
+                offset = offsets.Skip(start).Take(requiredMatchCount).GetMedian();
+                return true;
+            }
+        }
+
+        offset = default;
+        return false;
+    }
+
+    /// <summary>
     /// Gets the median timing offset, calculated as each speech start minus its source cue start.
     /// </summary>
     /// <exception cref="ArgumentNullException"><paramref name="matches"/> is <see langword="null"/>.</exception>
@@ -38,5 +77,12 @@ public static class SubtitleSpeechMatchExtensions
         var secondTicks = second.Ticks;
         return TimeSpan.FromTicks(
             (firstTicks / 2) + (secondTicks / 2) + ((firstTicks % 2 + secondTicks % 2) / 2));
+    }
+
+    private static TimeSpan GetMedian(this IEnumerable<TimeSpan> values)
+    {
+        var offsets = values.ToArray();
+        var upper = offsets.Length / 2;
+        return offsets.Length % 2 == 1 ? offsets[upper] : Average(offsets[upper - 1], offsets[upper]);
     }
 }
