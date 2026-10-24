@@ -1,0 +1,71 @@
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+**/bin/
+**/obj/
+
+# Visual Studio cache, build results, and user-specific files
+.vs/
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+*.sln.iml
+
+# Visual Studio Code
+.vscode/
+
+# Rider and ReSharper
+.idea/
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# .NET tooling
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+
+# Coverlet and test output
+coverage*/
+*.coverage
+*.coveragexml
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# Media files
+*.avi
+*.mkv
+*.mov
+*.mp4
+*.mpeg
+*.mpg
+*.webm
+*.wmv
+
+# Subtitle files
+*.srt
+
+# Versioned test fixtures
+!tests/data/*.srt

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/SubtitleSyncer.SubtitleParsing/SubtitleSyncer.SubtitleParsing.csproj" />
+  <Project Path="tests/SubtitleSyncer.SubtitleParsing.Tests/SubtitleSyncer.SubtitleParsing.Tests.csproj" />
+</Solution>
