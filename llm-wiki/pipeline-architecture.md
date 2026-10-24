@@ -229,7 +229,8 @@ fixtures and commands are documented in [running tests](testing.md).
 4. Add `EnglishTranscription` in the transcription stack over VAD windows.
 5. Add local generic text translation and test Persian-to-English with fixed
    fixtures.
-6. Implement the matcher, offset estimator, acceptance rule, and diagnostics.
+6. Implement the matcher and basic median offset calculation; add an
+   acceptance rule and diagnostics.
 7. Compose the layers in `SynchronizationService`, then add an explicit
    subtitle-offset writer and end-to-end fixtures.
 

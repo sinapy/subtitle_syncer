@@ -38,8 +38,13 @@ match: Whisper recognizes “Last notice please.” and “Sean.” while the lo
 translation model produces unrelated text (including one refusal). It is a
 repeatable evidence fixture for evaluating a semantic similarity replacement.
 
-Offset estimation and offset-application APIs do not belong in this project
-yet. They will consume the returned matches in a separate client layer.
+`SubtitleSyncer.Matching.Client` is the application-facing wrapper around the
+matcher. Its `MatchingClient.MatchAsync()` delegates matching to
+`SubtitleSpeechMatcher`. `GetMedianOffset()` is an extension over returned
+matches that calculates `Speech.Start - Cue.Start` for each match, sorts those
+offsets, and returns their median (the average of the two middle offsets for
+an even count). It rejects an empty match sequence because no offset can be
+inferred.
 
 ## Related
 
