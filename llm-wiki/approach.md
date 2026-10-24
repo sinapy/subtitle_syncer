@@ -16,7 +16,7 @@ contracts and build order are in [layered pipeline architecture](pipeline-archit
 ```text
 movie → bounded audio → VAD → English transcription ────────┐
                                                            ├→ match → offsets → median → result
-subtitle file → parse → sanitize/filter → translate ────────┘
+subtitle file → parse → opted-in cue transforms → translate ┘
 ```
 
 ## Audio pipeline
@@ -33,12 +33,12 @@ subtitle file → parse → sanitize/filter → translate ───────�
 
 1. Parse the subtitle file into `IEnumerable<SubtitleCue>` models. A cue keeps
    its ordinal, start/end times, and original text.
-2. Sanitize text and remove translator credits, URLs, title cards, sound
-   labels, and other likely non-dialogue cues. Retain a reason for every
-   rejected cue for diagnostics.
-3. Translate the remaining dialogue cues from the declared source language to
-   a target language with an on-device model. The translated cue retains the
-   original cue timing and order.
+2. Apply only explicitly requested mechanical cue exclusions, such as excluding
+   cues with HTML tags, URLs, or empty text. Do not use heuristic filtering
+   for translator credits, title cards, or sound labels.
+3. Translate the selected cues from the declared source language to a target
+   language with an on-device model. The translated cue retains the original
+   cue timing and order.
 
 ## Synchronization pipeline
 
@@ -51,3 +51,6 @@ subtitle file → parse → sanitize/filter → translate ───────�
    tolerance. Return their median as the offset to apply to the original
    subtitle file; otherwise return an insufficient-confidence result rather
    than an arbitrary offset.
+
+The rationale for keeping transformations narrow and allowing the matcher to
+evaluate cue usefulness is recorded in the [software principles](software-principles.md).
