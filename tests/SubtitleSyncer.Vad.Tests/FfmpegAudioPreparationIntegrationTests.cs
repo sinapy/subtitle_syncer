@@ -10,10 +10,7 @@ public sealed class FfmpegAudioPreparationIntegrationTests
     {
         var moviePath = Path.Combine(FindRepositoryRoot(), "tests", "data",
             "Shaun.Of.The.Dead.(2004).[REMASTERED].[REPACK].[1080p].[BluRay].[5.1].[YTS.MX]-xpost.mp4");
-        if (!File.Exists(moviePath))
-        {
-            return; // The large developer-only movie fixture is intentionally not versioned.
-        }
+        Assert.True(File.Exists(moviePath), $"Required local movie fixture was not found: {moviePath}");
 
         var audio = new FfmpegAudioPreparation().Prepare(moviePath, VadOptions.DefaultAnalysisDuration,
             TestContext.Current.CancellationToken);
@@ -34,7 +31,7 @@ public sealed class FfmpegAudioPreparationIntegrationTests
         Assert.Contains(activities, activity => activity.Start >= TimeSpan.FromSeconds(53) &&
             activity.Start <= TimeSpan.FromSeconds(55)); // "Last orders please" at about 00:00:54.
         Assert.Contains(activities, activity => activity.Start >= TimeSpan.FromSeconds(62) &&
-            activity.Start <= TimeSpan.FromSeconds(64)); // "John" at about 00:01:03.
+            activity.Start <= TimeSpan.FromSeconds(64)); // "Shaun" at about 00:01:03.
     }
 
     private static string FindRepositoryRoot()

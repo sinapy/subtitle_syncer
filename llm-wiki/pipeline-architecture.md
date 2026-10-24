@@ -113,7 +113,6 @@ public sealed record VoiceActivityAnalysis(
 public interface IEnglishTranscriber
 {
     IEnumerable<SpeechSegment> Transcribe(PcmAudio audio);
-    IEnumerable<SpeechSegment> Transcribe(PcmAudio audio, TimeSpan start, TimeSpan end);
 }
 ```
 
@@ -129,11 +128,11 @@ VAD output must be sorted,
 non-overlapping, and bounded by `analysisDuration`; `EnglishTranscription`
 must preserve the absolute timeline positions from each activity.
 
-When calling the interval overload, orchestration passes the full prepared
-audio plus a VAD interval. `EnglishTranscription` includes two seconds of
-available audio on each side before inference, clamped to the prepared-audio
-boundary. This gives Whisper enough context for short utterances while all
-returned segment timestamps remain absolute.
+When orchestrating transcription over a VAD interval, the caller slices the
+prepared audio with two seconds of available audio on each side, clamped to the
+prepared-audio boundary, before passing it to `EnglishTranscription`. This
+gives Whisper enough context for short utterances while all returned segment
+timestamps remain absolute.
 
 ### Subtitle branch
 
@@ -200,8 +199,8 @@ estimate is a normal result, not an exception.
 `SynchronizationService` is the sole composition root for the pipeline:
 
 1. Ask VAD to prepare bounded audio and detect activities. For each activity,
-   pass the prepared audio and activity interval to `EnglishTranscription` so
-   it can include its configured recognition context.
+   slice the prepared audio with two seconds of bounded context, then pass that
+   audio to `EnglishTranscription`.
 2. Read the subtitle file, apply explicitly requested cue transforms, and
    translate the resulting cues.
 3. Pass both chronological sequences to the matcher, then pass matches to the
@@ -214,9 +213,8 @@ recorded fixtures for integration tests, and test the orchestration with fake
 implementations.
 
 Integration tests that require ignored local movies or model files remain in
-their owning test project and use xUnit v3's `Explicit = true` marker. They do
-not run in the default test pass; developers run them deliberately after
-provisioning their local fixtures.
+their owning test project and run in every test pass. The required local
+fixtures and commands are documented in [running tests](testing.md).
 
 ## Delivery order
 

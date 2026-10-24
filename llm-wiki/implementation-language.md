@@ -27,7 +27,7 @@ coverage](language-library-landscape.md).
 | SRT parsing and writing | SubtitlesParser |
 | Persian normalization | Persian.Plus |
 | Local Persian-to-English translation | LLamaSharp with the local Qwen2.5 1.5B Instruct Q4_K_M GGUF baseline |
-| Local English transcription | Whisper.net with a locally stored CPU-capable Whisper model |
+| Local English transcription | Whisper.net 1.9.1 plus `Whisper.net.Runtime`, with the local `ggml-small.en-q5_1.bin` Whisper GGML baseline |
 | Fuzzy matching | FuzzySharp |
 | Offset statistics | `TimeSpan`, LINQ, and MathNet.Numerics if needed |
 
@@ -47,6 +47,12 @@ and memory use on representative media before replacing them.
   native/model dependencies for an offline Windows user.
 - GPU support remains an optional optimisation and must not replace the CPU
   inference path.
+
+The English-only `small.en-q5_1` model is a 181 MiB quantized baseline with a
+useful quality/CPU tradeoff for short dialogue windows. It is available from
+the [official whisper.cpp model repository](https://huggingface.co/ggerganov/whisper.cpp)
+and should be stored under the ignored local `models/` directory rather than
+committed to source control.
 
 ## Related
 

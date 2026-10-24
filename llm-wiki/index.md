@@ -27,6 +27,8 @@ the project’s durable shared context.
   CPU-only translation stack and model provisioning instructions.
 - [Software principles](software-principles.md) — rules for safe transformations,
   preserving source data, and avoiding brittle heuristics.
+- [Running tests](testing.md) — required local integration fixtures and the
+  supported full test command.
 
 ## How to maintain this wiki
 
