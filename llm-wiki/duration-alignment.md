@@ -246,6 +246,7 @@ separate manifests, with held-out movies used to measure false acceptance.
 
 ## Related
 
+- [Running the subtitle sync CLI](running-cli.md)
 - [Approach](approach.md)
 - [Silero VAD integration](silero-vad.md)
 - [Running tests](testing.md)

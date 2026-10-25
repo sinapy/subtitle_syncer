@@ -21,6 +21,8 @@ the project’s durable shared context.
 - [Duration-only alignment](duration-alignment.md) — local constant-offset estimation from subtitle and VAD timing.
 - [Software principles](software-principles.md) — rules for safe transformations and reliable offset estimates.
 - [Running tests](testing.md) — supported checks and required local fixtures.
+- [Running the subtitle sync CLI](running-cli.md) — packaged and source
+  commands, options, output, and VAD export.
 - [Production readiness checklist](production-checklist.md) — release gates for
   the local release workflow.
 - [Ubuntu Debian packaging](ubuntu-packaging.md) — the amd64 `.deb` installer,
