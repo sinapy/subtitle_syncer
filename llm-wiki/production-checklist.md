@@ -2,7 +2,7 @@
 type: Release Checklist
 title: Production readiness checklist
 description: Release gates for the local, duration-only subtitle synchronization workflow.
-tags: [release, production, security, privacy, testing, windows]
+tags: [release, production, security, privacy, testing]
 timestamp: 2026-10-24T00:00:00Z
 ---
 
@@ -15,9 +15,9 @@ open.
 
 ## Release scope and user contract
 
-- [ ] The supported platform is documented as 64-bit Windows 10/11, including
-  the required .NET runtime, Python version, FFmpeg provisioning method, and
-  minimum disk and memory expectations.
+- [ ] The supported platform and release artifact are documented, including
+  FFmpeg provisioning and minimum disk and memory expectations. End users do
+  not need Python.
 - [ ] The release states that synchronization is fully on-device after local
   dependencies and the model are installed; no movie, subtitle timing, VAD
   activities, or telemetry is sent to a hosted service.
@@ -34,8 +34,8 @@ open.
   release contains no developer-machine paths or untracked files.
 - [ ] The deployed .NET sync console, ONNX model and JSON manifest, required
   native runtime files, and FFmpeg are all included or installed by a tested,
-  documented installer/bootstrapper. Python is required only to train or
-  convert a model artifact.
+  documented package. Python is required only to train or convert a model
+  artifact.
 - [ ] The release has been smoke-tested from a clean Windows 10 and Windows 11
   machine with no GPU; CUDA is only an optional optimization.
 - [ ] The sherpa-onnx runtime and bundled Silero ONNX model load on each
@@ -45,8 +45,8 @@ open.
 - [ ] Dependency vulnerability and malware scans have been run, reviewed, and
   recorded for .NET, Python packages, native binaries, FFmpeg, and the model
   distribution channel.
-- [ ] Release artifacts, installer, and model are versioned and integrity
-  protected (for example, signed binaries/installers and published hashes).
+- [ ] Release artifacts and model are versioned and integrity protected (for
+  example, signed binaries and published hashes).
 
 ## Functional and model-quality gates
 
@@ -82,9 +82,9 @@ open.
 - [ ] If diagnostics or update checks are added, they are opt-in or otherwise
   explicitly disclosed, minimize data, and are separately security-reviewed.
 - [ ] The default analysis duration, supported file-size/runtime envelope, and
-  expected CPU/RAM use have been measured on representative ordinary Windows
+  expected CPU/RAM use have been measured on representative supported
   hardware.
-- [ ] A rollback procedure identifies the prior signed installer and matching
+- [ ] A rollback procedure identifies the prior signed release and matching
   model; releases retain enough provenance to reproduce the shipped artifact.
 - [ ] Support documentation includes installation, offline use, manual
   correction fallback, known limitations, and a route for reporting false

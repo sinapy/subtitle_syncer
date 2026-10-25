@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+if [ "${1:-}" = configure ] && [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != root ]; then
+    user_home="$(getent passwd "$SUDO_USER" | cut -d: -f6)"
+    user_group="$(id -gn "$SUDO_USER")"
+    if [ -n "$user_home" ] && [ -n "$user_group" ]; then
+        user_scripts="$user_home/.local/share/nautilus/scripts"
+        install -d -m 700 -o "$SUDO_USER" -g "$user_group" "$user_scripts"
+        install -m 755 -o "$SUDO_USER" -g "$user_group" \
+            /usr/share/nautilus/scripts/Sync\ with\ movie\ using\ Subtitle\ Syncer \
+            "$user_scripts/Sync with movie using Subtitle Syncer"
+    fi
+fi
+
+exit 0

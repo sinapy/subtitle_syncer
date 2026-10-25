@@ -22,9 +22,9 @@ the project’s durable shared context.
 - [Software principles](software-principles.md) — rules for safe transformations and reliable offset estimates.
 - [Running tests](testing.md) — supported checks and required local fixtures.
 - [Production readiness checklist](production-checklist.md) — release gates for
-  the local Windows workflow.
-- [Explorer context-menu integration](explorer-context-menu.md) — per-user
-  Windows right-click entry for SRT files.
+  the local release workflow.
+- [Ubuntu Debian packaging](ubuntu-packaging.md) — the amd64 `.deb` installer,
+  self-contained .NET release, and FFmpeg dependency contract.
 
 ## How to maintain this wiki
 
