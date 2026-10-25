@@ -7,6 +7,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.29.0" />
-    <ProjectReference Include="../../src/SubtitleSyncer.Vad/SubtitleSyncer.Vad.csproj" />
+    <ProjectReference Include="../../src/SubtitleSyncer.Vad/SubtitleSyncer.Vad.csproj">
+      <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+    </ProjectReference>
   </ItemGroup>
 </Project>
